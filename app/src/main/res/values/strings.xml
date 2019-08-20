@@ -1,0 +1,12 @@
+<resources>
+	<string name="app_name">KotlinBT</string>
+
+
+	<!-- Menu items -->
+	<string name="menu_connect">연결</string>
+	<string name="menu_disconnect">연결해제</string>
+	<string name="menu_scan">검색</string>
+	<string name="menu_stop">중지</string>
+	<string name="title_activity_maps">Map</string>
+	<string name="refresh">Refresh</string>
+</resources>
