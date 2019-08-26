@@ -12,11 +12,13 @@ import android.util.Log
 import android.widget.TextView
 import com.example.kotlinbt.Application.AppController
 import com.example.kotlinbt.R
-import com.example.kotlinbt.bluetooth.BluetoothLeService
 import com.example.kotlinbt.database.DbOpenHelper
 import com.example.kotlinbt.database.ItemData
 import kotlinx.android.synthetic.main.activity_lock.*
+import kotlinx.coroutines.*
+import java.lang.Runnable
 import kotlin.concurrent.thread
+import kotlin.coroutines.*
 
 class LockActivity : AppCompatActivity() {
 
@@ -42,9 +44,10 @@ class LockActivity : AppCompatActivity() {
 
     lateinit var moduleList: ArrayList<ItemData>
 
-    private var mBluetoothLeService: BluetoothLeService? = null
 
     private val connectedDevices= mutableListOf<BluetoothGatt>()
+
+
 
 
     val ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED"
@@ -205,77 +208,26 @@ class LockActivity : AppCompatActivity() {
     }
 
     fun addLog(text: String) {
-
-        var addLogText: TextView = TextView(this@LockActivity)
-        addLogText.text = text
-        addLogText.textSize = 12F
-        logArea.addView(addLogText)
-    }
-
-    val mServiceConnection: ServiceConnection = object : ServiceConnection {
-
-        override fun onServiceConnected(componentName: ComponentName, service: IBinder) {
-
-            Log.i("myTestLog", "onServiceConnected")
-
-            mBluetoothLeService = (service as BluetoothLeService.LocalBinder).getService()!!
-            if (!mBluetoothLeService!!.initialize()) {
-                //                Log.e(TAG, "Unable to initialize Bluetooth");
-                //                finish();
-            }
-
-
-            /**
-             * 연결된 기기 갯수 파악
-             */
-
-
-            for (i in moduleList.indices) {
-
-
-                Log.i("myTestLog", "counting attempt : " + moduleList[i].identNum)
-
-                connectBle(moduleList[i].identNum)
-
-            }
-
-            Log.i("myTag", "count_check : $countCheck")
-
-
-            // Automatically connects to the device upon successful start-up initialization.
-            //            mBluetoothLeService.connect(mDeviceAddress);
+        runOnUiThread {
+            val newString : String = logText.text as String + "\n" + text
+            logText.setText(newString)
         }
 
-        override fun onServiceDisconnected(componentName: ComponentName) {
-            mBluetoothLeService = null
-            Log.i("myTag", "application onServiceDisconnected")
-        }
     }
 
-    fun connectBle(mDeviceAddress: String) : Boolean
+
+    fun connectBle(mDevice: BluetoothDevice) : Boolean
     {
+        Log.i("myTestLog", "> counting attempt : " + mDevice)
 
-
-        Log.i("myTestLog", "> counting attempt : " + mDeviceAddress)
-
-
-        if (mBluetoothAdapter == null || mDeviceAddress == null) {
+        if (mBluetoothAdapter == null || mDevice == null) {
             Log.i("myTestLog", "BluetoothAdapter not initialized or unspecified address.")
             return false
         }
 
-        val device = mBluetoothAdapter.getRemoteDevice(mDeviceAddress)
-
-        if (device == null) {
-            Log.i("myTestLog", " >> Device not found.  Unable to connect.")
-            return false
-        }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
-        device.connectGatt(this, false, mGattCallback)
-        Log.i("myTestLog", " >><<")
-
-
+        mDevice.connectGatt(this, false, mGattCallback)
         return false
     }
 
@@ -289,19 +241,15 @@ class LockActivity : AppCompatActivity() {
 
         for(device in connectedDevices) {
             //device.disconnect()
-            val handler = Handler()
-
-            handler.postDelayed({
+            val job = CoroutineScope(Dispatchers.Default).launch {
                 device.disconnect()
+                device.close()
                 Log.d("Lock_Destroy", "disconnect !! : " + device.device.name)
-            } , 400)
-
-
+            }
         }
 
+        mBluetoothAdapter.startDiscovery()
 
-        unbindService(mServiceConnection)
-        unregisterReceiver(mGattUpdateReceiver)
     }
 
     override fun onResume() {
@@ -309,10 +257,31 @@ class LockActivity : AppCompatActivity() {
         var addLogText: TextView = TextView(this@LockActivity)
         addLogText.text = ""
 
+        mBluetoothAdapter.cancelDiscovery()
 
-        val gattServiceIntent = Intent(applicationContext, BluetoothLeService::class.java)
-        bindService(gattServiceIntent, mServiceConnection, Context.BIND_AUTO_CREATE)
-        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter())
+        val testset = mBluetoothAdapter.bondedDevices
+
+        /*
+        val th = Thread {
+            Log.d("Thread", "test")
+            for(device in AppController.instance.checkedDevice) {
+                connectBle(device)
+                Log.d("Thread", "device : " + device.address)
+            }
+        }
+        th.run()
+
+         */
+
+        for(device in testset) {
+            val job = CoroutineScope(Dispatchers.Default).launch {
+                connectBle(device)
+                Log.d("Coroutine", "device : " + device.address)
+            }
+
+        }
+
+
 
     }
 
@@ -337,9 +306,8 @@ class LockActivity : AppCompatActivity() {
                 addLog("Connected Device : " + device.name)
 
                 connectedDevices.add(gatt)
+                broadcastUpdate(intentAction)
 
-                // disconnect all devices !! @TODO
-                // gatt.disconnect()
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED
@@ -352,51 +320,19 @@ class LockActivity : AppCompatActivity() {
 
 
                 addLog("Disconnected Device : " + device.name)
+                broadcastUpdate(intentAction)
 
 
             } else {
                 Log.i("myTestLog", "newState : $newState")
             }
         }
-    }
 
-    private val mGattUpdateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-
-                Log.i("myTestLog", " >>> BroadcastReceiver 연결성공")
-
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                Log.i("myTestLog", " >>> BroadcastReceiver 연결 해제")
-
-            }
+        private fun broadcastUpdate(action: String) {
+            val intent = Intent(action)
+            sendBroadcast(intent)
         }
     }
 
-    private fun makeGattUpdateIntentFilter(): IntentFilter {
-        val intentFilter = IntentFilter()
-
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTING)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED_CAROUSEL)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED_OTA)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECT_OTA)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED_OTA)
-        intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICE_DISCOVERY_UNSUCCESSFUL)
-        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE)
-        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CHARACTERISTIC_ERROR)
-        intentFilter.addAction(BluetoothLeService.ACTION_WRITE_SUCCESS)
-        intentFilter.addAction(BluetoothLeService.ACTION_WRITE_FAILED)
-        intentFilter.addAction(BluetoothLeService.ACTION_PAIR_REQUEST)
-        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-        intentFilter.addAction(BluetoothDevice.EXTRA_BOND_STATE)
-        intentFilter.addAction(BluetoothLeService.ACTION_WRITE_COMPLETED)
-        return intentFilter
-    }
 
 }

@@ -45,11 +45,6 @@
         </activity>
 
         <service android:name="com.example.kotlinbt.bluetooth.BluetoothLeService" />
-
-        <provider
-            android:name="com.android.tools.ir.server.InstantRunContentProvider"
-            android:authorities="com.example.kotlinbt.com.android.tools.ir.server.InstantRunContentProvider"
-            android:multiprocess="true" />
     </application>
 
 </manifest>

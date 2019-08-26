@@ -19,6 +19,7 @@
 			android:roundIcon="@mipmap/ic_launcher_round"
 			android:supportsRtl="true"
 			android:theme="@style/AppTheme">
+
 		<activity android:name=".lock.LockActivity">
 		</activity>
 		<activity android:name=".condition.ConditionActivity">
@@ -35,7 +36,7 @@
 		<activity android:name=".DeviceRegister.DeviceSearchActivity">
 		</activity>
 
-		<service android:name=".bluetooth.BluetoothLeService"></service>
+		<service android:name=".bluetooth.BluetoothLeService"/>
 	</application>
 
 </manifest>

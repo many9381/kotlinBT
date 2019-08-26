@@ -1,4 +1,0 @@
-#Fri Aug 16 08:12:12 KST 2019
-base.0=/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/transforms/dexMerger/debug/9
-path.0=classes.dex
-renamed.0=classes.dex

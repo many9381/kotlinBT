@@ -744,6 +744,7 @@ id line3
 id listMode
 id list_item
 id logArea
+id logText
 id mainList
 id menu_connect
 id menu_disconnect

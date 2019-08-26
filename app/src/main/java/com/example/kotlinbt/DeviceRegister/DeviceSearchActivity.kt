@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.bluetooth.BluetoothAdapter.*
 import android.bluetooth.BluetoothDevice.*
+import android.bluetooth.le.*
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.drawable.ColorDrawable
@@ -24,6 +25,11 @@ import com.example.kotlinbt.database.DbOpenHelper
 import com.example.kotlinbt.DeviceRegister.presenter.DeviceAdapter
 import com.example.kotlinbt.database.ItemData
 import kotlinx.android.synthetic.main.activity_device_search.*
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.ArrayList
 import kotlin.experimental.and
 
 class DeviceSearchActivity : AppCompatActivity() {
@@ -35,6 +41,14 @@ class DeviceSearchActivity : AppCompatActivity() {
 
     private lateinit var mLedeviceAdapter: DeviceAdapter
     private lateinit var mBluetoothAdapter: BluetoothAdapter
+
+    private val mBluetoothLeScanner: BluetoothLeScanner
+        get() {
+            val bluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val bluetoothAdapter = bluetoothManager.adapter
+            mBluetoothAdapter = bluetoothAdapter
+            return bluetoothAdapter.bluetoothLeScanner
+        }
 
     private val SCAN_PERIOD: Long = 10000
 
@@ -215,8 +229,11 @@ class DeviceSearchActivity : AppCompatActivity() {
         super.onDestroy()
 
         for(device in pairedDevices) {
-            device.disconnect()
-            Log.d("onDestroy", "disconnect !! : " + device.device.name)
+            val job = CoroutineScope(Dispatchers.Default).launch {
+                device.disconnect()
+                device.close()
+                Log.d("Lock_Destroy", "disconnect !! : " + device.device.name)
+            }
         }
 
         val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -319,7 +336,7 @@ class DeviceSearchActivity : AppCompatActivity() {
     }
 
 
-
+/*
     private fun scanLeDevice(enable: Boolean) {
         if (enable) {
             // Stops scanning after a pre-defined scan period.
@@ -338,39 +355,73 @@ class DeviceSearchActivity : AppCompatActivity() {
         invalidateOptionsMenu()
     }
 
-    // Device scan callback.
-    private val mLeScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
-        runOnUiThread {
+ */
 
+    fun scanLeDevice(enable: Boolean) {
+
+        if (enable) {
+            // Stops scanning after a pre-defined scan period.
+            mHandler.postDelayed({
+                mScanning = false
+                mBluetoothLeScanner.stopScan(leScanCallback)
+                invalidateOptionsMenu()
+
+                // reScanBtn.visibility = View.VISIBLE
+            }, SCAN_PERIOD)
+
+            val mScanSettingBuilder = ScanSettings.Builder()
+            val filters : List<ScanFilter> = ArrayList<ScanFilter>()
+            val scanSettings = mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(0).build()
+
+
+            mScanning = true
+            mBluetoothLeScanner.startScan(filters, scanSettings, leScanCallback)
+        } else {
+            mScanning = false
+            mBluetoothLeScanner.stopScan(leScanCallback)
+        }
+        invalidateOptionsMenu()
+    }
+
+    // Device scan callback.
+    private val leScanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            val device = result.device
+            val record = result.scanRecord
+
+            /*
             val prepix = ByteArray(9)
             val uuidBytes = ByteArray(16)
-            System.arraycopy(scanRecord, 0, prepix, 0, 9)
-            System.arraycopy(scanRecord, 9, uuidBytes, 0, 16)
+            System.arraycopy(record, 0, prepix, 0, 9)
+            System.arraycopy(record, 9, uuidBytes, 0, 16)
 
 
             val prepixHexString = prepix.toHexString().toUpperCase()
             val hexString = uuidBytes.toHexString().toUpperCase()
 
+             */
 
             if (true){//device.name != null) {
                 Log.d("Hex", "UUID : " + device.name)
                 Log.d("Address", "ADDRESS " + device.address)
-                Log.d("Hex", "PREPIX : " + prepixHexString)
-                Log.d("Hex", "HEXID : " + hexString)
+               // Log.d("Hex", "PREPIX : " + prepixHexString)
+               // Log.d("Hex", "HEXID : " + hexString)
 
             }
 
-
-            // ibeacon Filter
-            val prefixFilter = "02011A1AFF4C000215"
-
-            //if (mDbOpenHelper.DbFind(device.address) == null && prepixHexString == prefixFilter) {
             if (mDbOpenHelper.DbFind(device.address) == null) {
-            //if (mDbOpenHelper.DbFind(device.address) == null) {
+                //if (mDbOpenHelper.DbFind(device.address) == null) {
 
                 mLedeviceAdapter.addDevice(device)
                 mLedeviceAdapter.notifyDataSetChanged()
             }
+
+        }
+
+        override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+            super.onBatchScanResults(results)
+
+            Log.d("test", "onBatchScanResults!!")
         }
 
 

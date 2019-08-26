@@ -4,17 +4,7 @@
             "outputFile": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-my/values-my.xml",
             "map": [
                 {
-                    "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/04da24a291e06f5e469c8c766c93b1cf/res/values-my/values-my.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "105,214,319,436,529,641,769,847,926,1012,1135,1247,1349,1475,1586,1696,1856,1956",
-                        "endColumns": "108,104,116,92,111,127,77,78,85,122,111,101,125,110,109,159,99,83",
-                        "endOffsets": "209,314,431,524,636,764,842,921,1007,1130,1242,1344,1470,1581,1691,1851,1951,2035"
-                    }
-                },
-                {
-                    "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/3e34a442459efd084d29f9752434155b/res/values-my/values-my.xml",
+                    "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/31b52c28f15bbd01c23bcce9bd5a2da1/support-compat-27.1.1/res/values-my/values-my.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -28,6 +18,16 @@
                         "startOffsets": "2040",
                         "endColumns": "100",
                         "endOffsets": "2136"
+                    }
+                },
+                {
+                    "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/values-my/values-my.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "105,214,319,436,529,641,769,847,926,1012,1135,1247,1349,1475,1586,1696,1856,1956",
+                        "endColumns": "108,104,116,92,111,127,77,78,85,122,111,101,125,110,109,159,99,83",
+                        "endOffsets": "209,314,431,524,636,764,842,921,1007,1130,1242,1344,1470,1581,1691,1851,1951,2035"
                     }
                 }
             ]

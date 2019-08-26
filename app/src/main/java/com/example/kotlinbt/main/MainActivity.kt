@@ -4,10 +4,9 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.bluetooth.le.*
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
 
@@ -19,12 +18,11 @@ import android.os.Build
 import android.os.Handler
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-import android.view.Menu
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.example.kotlinbt.Application.AppController
 import com.example.kotlinbt.DeviceRegister.DeviceSearchActivity
-import com.example.kotlinbt.DeviceRegister.presenter.DeviceAdapter
 import com.example.kotlinbt.R
 import com.example.kotlinbt.condition.ConditionActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -38,6 +36,11 @@ import java.util.ArrayList
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private var mBluetoothAdapter: BluetoothAdapter? = null
+    //private var bluetoothManager : BluetoothManager? = null
+
+    //private var mbluetoothLeScanner: BluetoothLeScanner? = null
+
+
 
     private val REQUEST_ENABLE_BT = 12
     private val REQUEST_LOCATION_PERMISSION = 2018
@@ -52,6 +55,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private var mScanning: Boolean = false
 
     lateinit var devices: Set<BluetoothDevice>
+    //lateinit var checkedDevices : DeviceObject
+
 
     lateinit var mDbOpenHelper: DbOpenHelper
 
@@ -59,15 +64,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private val FINSH_INTERVAL_TIME: Long = 2000
     private var backPressedTime: Long = 0
 
+    private val mBluetoothLeScanner: BluetoothLeScanner
+        get() {
+            val bluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            val bluetoothAdapter = bluetoothManager.adapter
+            mBluetoothAdapter = bluetoothAdapter
+            return bluetoothAdapter.bluetoothLeScanner
+        }
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         mDbOpenHelper = AppController.instance.mDbOpenHelper
 
-        //itemDatas.add(test)
-
-        // RecyclerView setting
 
 
         // Recyclerview Remove Button Onclick function
@@ -124,12 +136,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         mHandler = Handler()
 
-        //setting up BLE
-        mBluetoothAdapter?.takeIf { it.isDisabled }?.apply {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-            Log.d("BTapp_MainActivity", "BT Adapter Permission Request")
-        }
 
         // BT Permission Request
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -170,8 +176,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
 
 
-        val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        mBluetoothAdapter = bluetoothManager.adapter
+        //val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        /*
+        bluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = bluetoothManager?.adapter
+        mbluetoothLeScanner = mBluetoothAdapter?.bluetoothLeScanner
+
+         */
 
         // onClick Listener
         deviceRegisterArea.setOnClickListener(this)
@@ -189,12 +200,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onResume() {
         super.onResume()
 
+        //checkedDevices = DeviceObject()
+
+        AppController.instance.checkedDevice = mutableListOf<BluetoothDevice>()
+
         //recyclerview add item
         itemDatas = mDbOpenHelper.DbMainSelect()
         mAdapter.renewDatas(itemDatas)
 
-        devices = mBluetoothAdapter!!.bondedDevices
-
+        //devices = mBluetoothAdapter!!.bondedDevices
 
         scanLeDevice(true)
 
@@ -227,6 +241,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.unlockArea -> {
                 scanLeDevice(false)
                 val intent: Intent = Intent(this, LockActivity::class.java)
+                Log.d("MainActivity", "passedDevice count : " + AppController.instance.checkedDevice.count())
                 startActivity(intent)
             }
 
@@ -285,31 +300,71 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-    private fun scanLeDevice(enable: Boolean) {
+    fun scanLeDevice(enable: Boolean) {
+
         if (enable) {
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed({
                 mScanning = false
-                mBluetoothAdapter?.stopLeScan(mLeScanCallback)
+                mBluetoothLeScanner.stopScan(leScanCallback)
                 invalidateOptionsMenu()
 
                 reScanBtn.visibility = View.VISIBLE
             }, SCAN_PERIOD)
 
+            val mScanSettingBuilder = ScanSettings.Builder()
+            val filters : List<ScanFilter> = ArrayList<ScanFilter>()
+            val scanSettings = mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(0).build()
+
+
             mScanning = true
-            mBluetoothAdapter?.startLeScan(mLeScanCallback)
+            mBluetoothLeScanner.startScan(filters, scanSettings, leScanCallback)
         } else {
             mScanning = false
-            mBluetoothAdapter?.stopLeScan(mLeScanCallback)
+            mBluetoothLeScanner.stopScan(leScanCallback)
         }
         invalidateOptionsMenu()
     }
 
+
+
+
     // Device scan callback.
-    private val mLeScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
+    private val leScanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            val device = result.device
+            if (mDbOpenHelper.DbFind(device.address) != null) {
+
+                Log.d("LeScanCallback", "UUID : " + device.name)
+                Log.d("LeScanCallback", "ADDRESS : " + device.address)
+                Log.d("LeScanCallback", "BONDSTATE : " + device.bondState)
+
+                if (device.bondState == BluetoothDevice.BOND_BONDING || device.bondState == BluetoothDevice.BOND_BONDED) {
+                    mAdapter.setOnline(device.address)
+
+                } else if (device.bondState == BluetoothDevice.BOND_NONE) {
+                    if(pairDevice(device)) {
+
+                        mAdapter.setOnlineCheck(device)
+                    }
+                }
+
+            }
+        }
+
+        override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+            super.onBatchScanResults(results)
+
+            Log.d("test", "onBatchScanResults!!")
+        }
+
+
+    }
+
+
+
+    /*{ device, rssi, scanRecord ->
         runOnUiThread {
-
-
 
             if (mDbOpenHelper.DbFind(device.address) != null) {
                 //if (mDbOpenHelper.DbFind(device.address) == null) {
@@ -323,9 +378,40 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 if (device.bondState == BluetoothDevice.BOND_BONDING || device.bondState == BluetoothDevice.BOND_BONDED) {
                     mAdapter.setOnline(device.address)
+                    //checkedDevices.pairedDeviceObject.add(device)
+
+                    /*
+                    var flag = true
+                    for(dev in AppController.instance.checkedDevice) {
+                            if(dev.address == device.address) {
+                                flag = false
+                                break
+                            }
+                    }
+                    if(flag) {
+                        AppController.instance.checkedDevice.add(device)
+                    }
+                     */
+
+
                 } else if (device.bondState == BluetoothDevice.BOND_NONE) {
-                    pairDevice(device)
-                    mAdapter.setOnlineCheck(device)
+                    if(pairDevice(device)) {
+                        //checkedDevices.pairedDeviceObject.add(device)
+                        /*
+                        var flag = true
+                        for(dev in AppController.instance.checkedDevice) {
+                            if(dev.address == device.address) {
+                                flag = false
+                                break
+                            }
+                        }
+                        if(flag) {
+                            AppController.instance.checkedDevice.add(device)
+                        }
+
+                         */
+                        mAdapter.setOnlineCheck(device)
+                    }
                 }
 
             }
@@ -335,6 +421,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+     */
 
 
     fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
