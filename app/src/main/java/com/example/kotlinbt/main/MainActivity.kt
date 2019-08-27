@@ -4,6 +4,7 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
@@ -36,13 +37,8 @@ import java.util.ArrayList
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private var mBluetoothAdapter: BluetoothAdapter? = null
-    //private var bluetoothManager : BluetoothManager? = null
+    private var mBluetoothManager: BluetoothManager? = null
 
-    //private var mbluetoothLeScanner: BluetoothLeScanner? = null
-
-
-
-    private val REQUEST_ENABLE_BT = 12
     private val REQUEST_LOCATION_PERMISSION = 2018
     private val SCAN_PERIOD: Long = 10000
 
@@ -54,10 +50,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     lateinit var mHandler: Handler
     private var mScanning: Boolean = false
 
-    lateinit var devices: Set<BluetoothDevice>
-    //lateinit var checkedDevices : DeviceObject
-
-
     lateinit var mDbOpenHelper: DbOpenHelper
 
     // Check press Back Button Two times
@@ -67,6 +59,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private val mBluetoothLeScanner: BluetoothLeScanner
         get() {
             val bluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            mBluetoothManager = bluetoothManager
             val bluetoothAdapter = bluetoothManager.adapter
             mBluetoothAdapter = bluetoothAdapter
             return bluetoothAdapter.bluetoothLeScanner
@@ -202,13 +195,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         //checkedDevices = DeviceObject()
 
-        AppController.instance.checkedDevice = mutableListOf<BluetoothDevice>()
-
         //recyclerview add item
         itemDatas = mDbOpenHelper.DbMainSelect()
         mAdapter.renewDatas(itemDatas)
-
-        //devices = mBluetoothAdapter!!.bondedDevices
 
         scanLeDevice(true)
 
@@ -241,7 +230,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.unlockArea -> {
                 scanLeDevice(false)
                 val intent: Intent = Intent(this, LockActivity::class.java)
-                Log.d("MainActivity", "passedDevice count : " + AppController.instance.checkedDevice.count())
                 startActivity(intent)
             }
 
@@ -358,7 +346,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             Log.d("test", "onBatchScanResults!!")
         }
 
+        override fun onScanFailed(errorCode: Int) {
+            super.onScanFailed(errorCode)
 
+            Log.d("LeScan Failed", "Err Code : $errorCode")
+        }
     }
 
 

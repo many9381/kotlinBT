@@ -11,7 +11,6 @@ class AppController : Application() {
 
 
     lateinit var mDbOpenHelper: DbOpenHelper
-    lateinit var checkedDevice : MutableList<BluetoothDevice>
 
 
     override fun onCreate() {

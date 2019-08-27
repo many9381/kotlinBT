@@ -28,6 +28,7 @@ import kotlinx.android.synthetic.main.activity_device_search.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.ArrayList
 import kotlin.experimental.and
@@ -93,7 +94,6 @@ class DeviceSearchActivity : AppCompatActivity() {
 
                 if((state == BluetoothDevice.BOND_BONDED && prev_state == BluetoothDevice.BOND_BONDING) || state == BluetoothDevice.BOND_BONDED) {
                     Log.d("PairingRequest", "Paired")
-                    //disconnectGatt()
 
                 }
                 else if (state == BluetoothDevice.BOND_NONE && prev_state == BluetoothDevice.BOND_BONDED){
@@ -230,6 +230,7 @@ class DeviceSearchActivity : AppCompatActivity() {
 
         for(device in pairedDevices) {
             val job = CoroutineScope(Dispatchers.Default).launch {
+                delay(500)
                 device.disconnect()
                 device.close()
                 Log.d("Lock_Destroy", "disconnect !! : " + device.device.name)
@@ -237,6 +238,7 @@ class DeviceSearchActivity : AppCompatActivity() {
         }
 
         val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        /*
         val connectedDevices : List<BluetoothDevice>? = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
 
         connectedDevices!!.forEach {
@@ -244,6 +246,8 @@ class DeviceSearchActivity : AppCompatActivity() {
             val device = mBluetoothAdapter.getRemoteDevice(it.toString())
 
         }
+
+         */
 
         unregisterReceiver(mPairingRequestReceiver)
     }
@@ -317,6 +321,7 @@ class DeviceSearchActivity : AppCompatActivity() {
 
                     pairedDevices.add(gatt)
                     //disconnectGatt()
+                    gatt.close()
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     intentAction = ACTION_GATT_DISCONNECTED
@@ -389,17 +394,6 @@ class DeviceSearchActivity : AppCompatActivity() {
             val device = result.device
             val record = result.scanRecord
 
-            /*
-            val prepix = ByteArray(9)
-            val uuidBytes = ByteArray(16)
-            System.arraycopy(record, 0, prepix, 0, 9)
-            System.arraycopy(record, 9, uuidBytes, 0, 16)
-
-
-            val prepixHexString = prepix.toHexString().toUpperCase()
-            val hexString = uuidBytes.toHexString().toUpperCase()
-
-             */
 
             if (true){//device.name != null) {
                 Log.d("Hex", "UUID : " + device.name)
@@ -424,19 +418,17 @@ class DeviceSearchActivity : AppCompatActivity() {
             Log.d("test", "onBatchScanResults!!")
         }
 
+        override fun onScanFailed(errorCode: Int) {
+            super.onScanFailed(errorCode)
+
+            Log.d("LeScan Failed", "Err Code : $errorCode")
+        }
+
 
     }
 
     // Binary to String
     fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
-
-    @Throws(Exception::class)
-    fun createBond(btDevice: BluetoothDevice): Boolean {
-        val class1 = Class.forName("android.bluetooth.BluetoothDevice")
-        val createBondMethod = class1.getMethod("createBond")
-        val returnValue = createBondMethod.invoke(btDevice) as Boolean
-        return returnValue
-    }
 
     private fun pairDevice(device: BluetoothDevice) : Boolean {
         Log.i("SearchActivity-Pairing", "name : " + device.getName().toString())
@@ -444,20 +436,14 @@ class DeviceSearchActivity : AppCompatActivity() {
 
         val bondresult = device.createBond()
 
-        mGatt = device.connectGatt(this, false, gattCallback)
+
+        mGatt = device.connectGatt(this, false, gattCallback, TRANSPORT_LE)
+        mGatt!!.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+
 
         Log.i("SearchActivity-Pairing", "Bondresult : " + bondresult)
         return bondresult
 
-    }
-
-    private fun disconnectGatt() {
-
-        Log.d("disconnectGatt", "Device : " + mGatt?.device)
-        if(mGatt != null) {
-            mGatt?.disconnect()
-            mGatt?.close()
-        }
     }
 
 

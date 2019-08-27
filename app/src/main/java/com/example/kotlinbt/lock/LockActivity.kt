@@ -41,6 +41,7 @@ class LockActivity : AppCompatActivity() {
     lateinit var mDbOpenHelper: DbOpenHelper
 
     private lateinit var mBluetoothAdapter: BluetoothAdapter
+    private lateinit var bluetoothManager: BluetoothManager
 
     lateinit var moduleList: ArrayList<ItemData>
 
@@ -59,7 +60,7 @@ class LockActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lock)
 
-        var bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+         bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
 
         mBluetoothAdapter = bluetoothManager.adapter
         mDbOpenHelper = AppController.instance.mDbOpenHelper
@@ -216,25 +217,11 @@ class LockActivity : AppCompatActivity() {
     }
 
 
-    fun connectBle(mDevice: BluetoothDevice) : Boolean
-    {
-        Log.i("myTestLog", "> counting attempt : " + mDevice)
-
-        if (mBluetoothAdapter == null || mDevice == null) {
-            Log.i("myTestLog", "BluetoothAdapter not initialized or unspecified address.")
-            return false
-        }
-
-        // We want to directly connect to the device, so we are setting the autoConnect
-        // parameter to false.
-        mDevice.connectGatt(this, false, mGattCallback)
-        return false
-    }
-
 
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
+
 
 
         Log.d("lock_destroy", "connected device : " + connectedDevices.size )
@@ -242,7 +229,8 @@ class LockActivity : AppCompatActivity() {
         for(device in connectedDevices) {
             //device.disconnect()
             val job = CoroutineScope(Dispatchers.Default).launch {
-                device.disconnect()
+                delay(500)
+                //device.disconnect()
                 device.close()
                 Log.d("Lock_Destroy", "disconnect !! : " + device.device.name)
             }
@@ -261,22 +249,12 @@ class LockActivity : AppCompatActivity() {
 
         val testset = mBluetoothAdapter.bondedDevices
 
-        /*
-        val th = Thread {
-            Log.d("Thread", "test")
-            for(device in AppController.instance.checkedDevice) {
-                connectBle(device)
-                Log.d("Thread", "device : " + device.address)
-            }
-        }
-        th.run()
-
-         */
 
         for(device in testset) {
             val job = CoroutineScope(Dispatchers.Default).launch {
-                connectBle(device)
+                device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
                 Log.d("Coroutine", "device : " + device.address)
+                delay(60)
             }
 
         }
@@ -289,43 +267,53 @@ class LockActivity : AppCompatActivity() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             val intentAction: String
 
-            Log.i("myTestLog", " >>>> onConnectionStateChange")
-
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                intentAction = ACTION_GATT_CONNECTED
-
-                val device = gatt.device
-
-
-                connectDeviceCount++
-
-                if (mDbOpenHelper.DbTargetFind(device.address) != null) {
-                    targetDeviceCount++
+            if(status == BluetoothGatt.GATT_SUCCESS) {
+                if(newState == BluetoothProfile.STATE_CONNECTING) {
+                    Log.d("Connecting", "Device : ${gatt.device}")
                 }
 
-                addLog("Connected Device : " + device.name)
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    intentAction = ACTION_GATT_CONNECTED
 
-                connectedDevices.add(gatt)
-                broadcastUpdate(intentAction)
-
-
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                intentAction = ACTION_GATT_DISCONNECTED
-                Log.i("myTag", "---- Disconnected ----")
-
-                val device = gatt.device
-                Log.i("myTestLog", "disconnected Device : " + device.name)
-
-                unconnectDeviceCount++
+                    val device = gatt.device
 
 
-                addLog("Disconnected Device : " + device.name)
-                broadcastUpdate(intentAction)
+                    connectDeviceCount++
+
+                    if (mDbOpenHelper.DbTargetFind(device.address) != null) {
+                        targetDeviceCount++
+                    }
+
+                    addLog("Connected Device : " + device.name)
+
+                    connectedDevices.add(gatt)
+                    broadcastUpdate(intentAction)
+                    gatt.close()
 
 
-            } else {
-                Log.i("myTestLog", "newState : $newState")
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    intentAction = ACTION_GATT_DISCONNECTED
+                    Log.i("myTag", "---- Disconnected ----")
+
+                    val device = gatt.device
+                    Log.i("myTestLog", "disconnected Device : " + device.name)
+
+                    unconnectDeviceCount++
+
+
+                    addLog("Disconnected Device : " + device.name)
+                    broadcastUpdate(intentAction)
+
+
+                } else {
+                    Log.i("myTestLog", "newState : $newState")
+                }
+
             }
+            else {
+                gatt.close()
+            }
+
         }
 
         private fun broadcastUpdate(action: String) {
