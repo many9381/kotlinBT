@@ -1,6 +1,7 @@
 package com.example.kotlinbt.lock
 
 import android.bluetooth.*
+import android.bluetooth.le.*
 import android.content.*
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
@@ -11,6 +12,7 @@ import android.os.Message
 import android.util.Log
 import android.widget.TextView
 import com.example.kotlinbt.Application.AppController
+import com.example.kotlinbt.DeviceRegister.presenter.DeviceAdapter
 import com.example.kotlinbt.R
 import com.example.kotlinbt.database.DbOpenHelper
 import com.example.kotlinbt.database.ItemData
@@ -40,6 +42,7 @@ class LockActivity : AppCompatActivity() {
 
     lateinit var mDbOpenHelper: DbOpenHelper
 
+
     private lateinit var mBluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothManager: BluetoothManager
 
@@ -60,9 +63,12 @@ class LockActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lock)
 
+
          bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
 
         mBluetoothAdapter = bluetoothManager.adapter
+
+
         mDbOpenHelper = AppController.instance.mDbOpenHelper
         moduleList = mDbOpenHelper.DbMainSelect()
 
@@ -223,16 +229,19 @@ class LockActivity : AppCompatActivity() {
         isRunning = false
 
 
-
         Log.d("lock_destroy", "connected device : " + connectedDevices.size )
 
         for(device in connectedDevices) {
             //device.disconnect()
             val job = CoroutineScope(Dispatchers.Default).launch {
-                delay(500)
+
                 //device.disconnect()
-                device.close()
+                //device.close()
+                device.disconnect()
                 Log.d("Lock_Destroy", "disconnect !! : " + device.device.name)
+                delay(1000)
+                device.close()
+                Log.d("Lock_Destroy", "closed !! : " + device.device.name)
             }
         }
 
@@ -250,6 +259,8 @@ class LockActivity : AppCompatActivity() {
         val testset = mBluetoothAdapter.bondedDevices
 
 
+
+
         for(device in testset) {
             val job = CoroutineScope(Dispatchers.Default).launch {
                 device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
@@ -258,6 +269,8 @@ class LockActivity : AppCompatActivity() {
             }
 
         }
+
+
 
 
 
@@ -288,7 +301,8 @@ class LockActivity : AppCompatActivity() {
 
                     connectedDevices.add(gatt)
                     broadcastUpdate(intentAction)
-                    gatt.close()
+                    gatt.disconnect()
+                    //gatt.close()
 
 
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -298,8 +312,9 @@ class LockActivity : AppCompatActivity() {
                     val device = gatt.device
                     Log.i("myTestLog", "disconnected Device : " + device.name)
 
-                    unconnectDeviceCount++
+                    //unconnectDeviceCount++
 
+                    gatt.close()
 
                     addLog("Disconnected Device : " + device.name)
                     broadcastUpdate(intentAction)
@@ -321,6 +336,9 @@ class LockActivity : AppCompatActivity() {
             sendBroadcast(intent)
         }
     }
+
+
+
 
 
 }

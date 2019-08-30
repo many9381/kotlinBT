@@ -1,10 +1,7 @@
 package com.example.kotlinbt.main
 
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothProfile
+import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
@@ -431,6 +428,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val bondresult = device.createBond()
 
         Log.i("MainActivity-Pairing", "Bondresult : " + bondresult)
+
+
         return bondresult
 
     }

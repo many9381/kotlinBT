@@ -26,10 +26,7 @@ import com.example.kotlinbt.DeviceRegister.presenter.DeviceAdapter
 import com.example.kotlinbt.database.ItemData
 import kotlinx.android.synthetic.main.activity_device_search.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.ArrayList
 import kotlin.experimental.and
 
@@ -229,16 +226,21 @@ class DeviceSearchActivity : AppCompatActivity() {
         super.onDestroy()
 
         for(device in pairedDevices) {
-            val job = CoroutineScope(Dispatchers.Default).launch {
-                delay(500)
+            val job = Job()
+            CoroutineScope(Dispatchers.Default).launch {
+
+
                 device.disconnect()
-                device.close()
                 Log.d("Lock_Destroy", "disconnect !! : " + device.device.name)
+                delay(100)
+                device.close()
+                Log.d("Lock_Destroy", "closed !! : " + device.device.name)
             }
         }
 
-        val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         /*
+        val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+
         val connectedDevices : List<BluetoothDevice>? = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
 
         connectedDevices!!.forEach {
@@ -311,26 +313,33 @@ class DeviceSearchActivity : AppCompatActivity() {
     private val gattCallback = object : BluetoothGattCallback()  {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             val intentAction: String
+
+
+
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
                     intentAction = ACTION_GATT_CONNECTED
                     connectionState = STATE_CONNECTED
                     broadcastUpdate(intentAction)
                     Log.i("GATT", "Connected to GATT server.")
-                    Log.i("GATT", "Attempting to start service discovery: " + gatt.discoverServices())
 
                     pairedDevices.add(gatt)
+                    //gatt.requestMtu(20)
                     //disconnectGatt()
-                    gatt.close()
+                    //gatt.disconnect()
+                    //gatt.close()
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     intentAction = ACTION_GATT_DISCONNECTED
                     connectionState = STATE_DISCONNECTED
                     Log.i("GATT", "Disconnected from GATT server.")
                     //unpairDevice(gatt.device)
+                    gatt.close()
                     broadcastUpdate(intentAction)
                 }
             }
+
+
         }
 
         private fun broadcastUpdate(action: String) {
@@ -434,7 +443,9 @@ class DeviceSearchActivity : AppCompatActivity() {
         Log.i("SearchActivity-Pairing", "name : " + device.getName().toString())
         Log.i("SearchActivity-Pairing", "address : " + device.getAddress().toString())
 
+
         val bondresult = device.createBond()
+        //device.setPairingConfirmation(true)
 
 
         mGatt = device.connectGatt(this, false, gattCallback, TRANSPORT_LE)
