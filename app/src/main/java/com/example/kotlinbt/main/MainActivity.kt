@@ -3,8 +3,10 @@ package com.example.kotlinbt.main
 import android.Manifest
 import android.bluetooth.*
 import android.bluetooth.le.*
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
 
@@ -185,16 +187,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             reScanBtn.visibility = View.INVISIBLE
         }
 
+
+
     }
 
     override fun onResume() {
         super.onResume()
 
-        //checkedDevices = DeviceObject()
+        val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        registerReceiver(mPairingRequestReceiver, filter)
 
         //recyclerview add item
         itemDatas = mDbOpenHelper.DbMainSelect()
         mAdapter.renewDatas(itemDatas)
+        AppController.instance.checkedBLE = ArrayList<BluetoothDevice>()
 
         scanLeDevice(true)
 
@@ -209,6 +215,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onStop() {
         super.onStop()
         scanLeDevice(false)
+        unregisterReceiver(mPairingRequestReceiver)
     }
 
     // onClick Functions
@@ -227,6 +234,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.unlockArea -> {
                 scanLeDevice(false)
                 val intent: Intent = Intent(this, LockActivity::class.java)
+                Log.d("Maininstance", "checkBLE : ${AppController.instance.checkedBLE.size}")
                 startActivity(intent)
             }
 
@@ -326,11 +334,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 if (device.bondState == BluetoothDevice.BOND_BONDING || device.bondState == BluetoothDevice.BOND_BONDED) {
                     mAdapter.setOnline(device.address)
+                    if(!AppController.instance.checkedBLE.any{it -> it.address == device.address}) {
+                        AppController.instance.checkedBLE.add(device)
+                    }
 
                 } else if (device.bondState == BluetoothDevice.BOND_NONE) {
                     if(pairDevice(device)) {
-
                         mAdapter.setOnlineCheck(device)
+                        if(!AppController.instance.checkedBLE.any{it -> it.address == device.address}) {
+                            AppController.instance.checkedBLE.add(device)
+                        }
                     }
                 }
 
@@ -435,8 +448,61 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onDestroy() {
-        mDbOpenHelper.close()
         super.onDestroy()
+        mDbOpenHelper.close()
+
     }
 
+
+
+    //@TODO check RequeistReceiver
+    private val mPairingRequestReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+
+            Log.i("myTag", "get Action : " + action!!)
+            Log.i("myTag", "get Action : " + action)
+            Log.i("myTag", "get Action : " + action)
+
+            if (action == BluetoothDevice.ACTION_PAIRING_REQUEST) {
+                try {
+                    val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    val pin = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 1234)
+                    //the pin in case you need to accept for an specific pin
+                    Log.i(
+                        "myTag",
+                        "Start Auto Pairing. PIN = " + intent.getIntExtra(
+                            "android.bluetooth.device.extra.PAIRING_KEY",
+                            1234
+                        )
+                    )
+                    val pinBytes: ByteArray
+                    pinBytes = ("" + pin).toByteArray(charset("UTF-8"))
+                    device.setPin(pinBytes)
+                    //setPairing confirmation if neeeded
+                    device.setPairingConfirmation(true)
+                } catch (e: Exception) {
+                    Log.i("myTag", "Error occurs when trying to auto pair")
+                    e.printStackTrace()
+                }
+
+            }
+            else if(action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
+                val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
+                val prev_state = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
+
+                if((state == BluetoothDevice.BOND_BONDED && prev_state == BluetoothDevice.BOND_BONDING) || state == BluetoothDevice.BOND_BONDED) {
+                    Log.d("PairingRequest", "Paired")
+
+                }
+                else if (state == BluetoothDevice.BOND_NONE && prev_state == BluetoothDevice.BOND_BONDED){
+                    Log.d("PairingRequest", "unPaired")
+                }
+                else {
+                    Log.d("PairingRequest", "${state}")
+                }
+            }
+
+        }
+    }
 }

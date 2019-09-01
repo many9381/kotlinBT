@@ -245,6 +245,7 @@ class LockActivity : AppCompatActivity() {
             }
         }
 
+
         mBluetoothAdapter.startDiscovery()
 
     }
@@ -256,10 +257,8 @@ class LockActivity : AppCompatActivity() {
 
         mBluetoothAdapter.cancelDiscovery()
 
-        val testset = mBluetoothAdapter.bondedDevices
-
-
-
+        //val testset = mBluetoothAdapter.bondedDevices
+        val testset = AppController.instance.checkedBLE
 
         for(device in testset) {
             val job = CoroutineScope(Dispatchers.Default).launch {

@@ -151,14 +151,10 @@ class DeviceSearchActivity : AppCompatActivity() {
         mDbOpenHelper = AppController.instance.mDbOpenHelper
 
 
-        // pairing Request @TODO
-        Log.i("myTag", "registerReceiver start")
+
         val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-
-
         registerReceiver(mPairingRequestReceiver, filter)
 
-        Log.i("myTag", "registerReceiver end")
     }
 
 
