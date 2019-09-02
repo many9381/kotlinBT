@@ -29,6 +29,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.util.ArrayList
 import kotlin.experimental.and
+import android.bluetooth.BluetoothDevice
+import android.support.v4.app.SupportActivity
+import android.support.v4.app.SupportActivity.ExtraData
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 class DeviceSearchActivity : AppCompatActivity() {
 
@@ -38,15 +44,11 @@ class DeviceSearchActivity : AppCompatActivity() {
     lateinit var mHandler: Handler
 
     private lateinit var mLedeviceAdapter: DeviceAdapter
-    private lateinit var mBluetoothAdapter: BluetoothAdapter
 
-    private val mBluetoothLeScanner: BluetoothLeScanner
-        get() {
-            val bluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            val bluetoothAdapter = bluetoothManager.adapter
-            mBluetoothAdapter = bluetoothAdapter
-            return bluetoothAdapter.bluetoothLeScanner
-        }
+    private lateinit var mBluetoothAdapter: BluetoothAdapter
+    private lateinit var mBluetoothManager: BluetoothManager
+    private lateinit var mBluetoothLeScanner: BluetoothLeScanner
+
 
     private val SCAN_PERIOD: Long = 10000
 
@@ -66,6 +68,8 @@ class DeviceSearchActivity : AppCompatActivity() {
                 try {
                     val device = intent.getParcelableExtra<BluetoothDevice>(EXTRA_DEVICE)
                     val pin = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 1234)
+
+                    /*
                     //the pin in case you need to accept for an specific pin
                     Log.i(
                         "myTag",
@@ -74,11 +78,15 @@ class DeviceSearchActivity : AppCompatActivity() {
                             1234
                         )
                     )
-                    val pinBytes: ByteArray
-                    pinBytes = ("" + pin).toByteArray(charset("UTF-8"))
-                    device.setPin(pinBytes)
+
+                     */
+
+                    val PIN : String = "123400"
+                    device.setPin(PIN.toByteArray())
                     //setPairing confirmation if neeeded
                     device.setPairingConfirmation(true)
+                    abortBroadcast()
+
                 } catch (e: Exception) {
                     Log.i("myTag", "Error occurs when trying to auto pair")
                     e.printStackTrace()
@@ -89,6 +97,14 @@ class DeviceSearchActivity : AppCompatActivity() {
                 val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
                 val prev_state = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
 
+                val device = intent.getParcelableExtra<BluetoothDevice>(EXTRA_DEVICE)
+
+                /*
+                if(device.bondState != 12) {
+                    pairDevice(device)
+                }
+
+                 */
                 if((state == BluetoothDevice.BOND_BONDED && prev_state == BluetoothDevice.BOND_BONDING) || state == BluetoothDevice.BOND_BONDED) {
                     Log.d("PairingRequest", "Paired")
 
@@ -138,8 +154,10 @@ class DeviceSearchActivity : AppCompatActivity() {
 
         // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
         // BluetoothAdapter through BluetoothManager.
-        val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        mBluetoothAdapter = bluetoothManager.adapter
+
+        mBluetoothManager = AppController.instance.mBluetoothManager
+        mBluetoothAdapter = AppController.instance.mBluetoothAdapter
+        mBluetoothLeScanner = AppController.instance.mBluetoothLeScanner
 
         if (mBluetoothAdapter == null) {
             Toast.makeText(this, "Bluetooth not supported.", Toast.LENGTH_SHORT).show()
@@ -152,7 +170,8 @@ class DeviceSearchActivity : AppCompatActivity() {
 
 
 
-        val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        val filter = IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST)
+        filter.priority = IntentFilter.SYSTEM_HIGH_PRIORITY
         registerReceiver(mPairingRequestReceiver, filter)
 
     }
@@ -178,6 +197,7 @@ class DeviceSearchActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.menu_scan -> {
                 mLedeviceAdapter.clear()
+                mBluetoothAdapter.startDiscovery()
                 scanLeDevice(true)
             }
             R.id.menu_stop -> {
@@ -199,6 +219,7 @@ class DeviceSearchActivity : AppCompatActivity() {
 
             val device = mLedeviceAdapter.getDevice(position)
 
+
             if (mDbOpenHelper.DbFind(device.address) != null) {
                 Toast.makeText(applicationContext, "이미 등록된 장치입니다.", Toast.LENGTH_SHORT).show()
             } else {
@@ -207,6 +228,7 @@ class DeviceSearchActivity : AppCompatActivity() {
             }
 
         }
+
 
         scanLeDevice(true)
     }
@@ -220,6 +242,7 @@ class DeviceSearchActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+
 
         for(device in pairedDevices) {
             val job = Job()
@@ -322,7 +345,7 @@ class DeviceSearchActivity : AppCompatActivity() {
                     pairedDevices.add(gatt)
                     //gatt.requestMtu(20)
                     //disconnectGatt()
-                    //gatt.disconnect()
+                    gatt.disconnect()
                     //gatt.close()
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {

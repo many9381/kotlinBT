@@ -44,7 +44,8 @@ class LockActivity : AppCompatActivity() {
 
 
     private lateinit var mBluetoothAdapter: BluetoothAdapter
-    private lateinit var bluetoothManager: BluetoothManager
+    private var mBluetoothManager: BluetoothManager? = null
+    private lateinit var mBluetoothLeScanner: BluetoothLeScanner
 
     lateinit var moduleList: ArrayList<ItemData>
 
@@ -64,9 +65,9 @@ class LockActivity : AppCompatActivity() {
         setContentView(R.layout.activity_lock)
 
 
-         bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothManager = AppController.instance.mBluetoothManager
+        mBluetoothAdapter = AppController.instance.mBluetoothAdapter
 
-        mBluetoothAdapter = bluetoothManager.adapter
 
 
         mDbOpenHelper = AppController.instance.mDbOpenHelper
@@ -257,8 +258,8 @@ class LockActivity : AppCompatActivity() {
 
         mBluetoothAdapter.cancelDiscovery()
 
-        //val testset = mBluetoothAdapter.bondedDevices
-        val testset = AppController.instance.checkedBLE
+        val testset = mBluetoothAdapter.bondedDevices
+        //val testset = AppController.instance.checkedBLE
 
         for(device in testset) {
             val job = CoroutineScope(Dispatchers.Default).launch {

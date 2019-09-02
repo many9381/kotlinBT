@@ -30,13 +30,18 @@ import com.example.kotlinbt.database.DbOpenHelper
 import com.example.kotlinbt.database.ItemData
 import com.example.kotlinbt.lock.LockActivity
 import com.example.kotlinbt.main.presenter.MainAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.ArrayList
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
-    private var mBluetoothAdapter: BluetoothAdapter? = null
+    private lateinit var mBluetoothAdapter: BluetoothAdapter
     private var mBluetoothManager: BluetoothManager? = null
+    private lateinit var mBluetoothLeScanner: BluetoothLeScanner
 
     private val REQUEST_LOCATION_PERMISSION = 2018
     private val SCAN_PERIOD: Long = 10000
@@ -55,24 +60,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private val FINSH_INTERVAL_TIME: Long = 2000
     private var backPressedTime: Long = 0
 
-    private val mBluetoothLeScanner: BluetoothLeScanner
-        get() {
-            val bluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            mBluetoothManager = bluetoothManager
-            val bluetoothAdapter = bluetoothManager.adapter
-            mBluetoothAdapter = bluetoothAdapter
-            return bluetoothAdapter.bluetoothLeScanner
-        }
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         mDbOpenHelper = AppController.instance.mDbOpenHelper
-
-
 
         // Recyclerview Remove Button Onclick function
         val obj = object : MainAdapter.BtnClickListener {
@@ -113,6 +106,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
             }
         }
+
+        mBluetoothManager = AppController.instance.mBluetoothManager
+        mBluetoothAdapter = AppController.instance.mBluetoothAdapter
+        mBluetoothLeScanner = AppController.instance.mBluetoothLeScanner
+        mBluetoothAdapter.cancelDiscovery()
+
 
         mAdapter = MainAdapter(itemDatas, this, obj)
         mainList.adapter = mAdapter
@@ -201,6 +200,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         itemDatas = mDbOpenHelper.DbMainSelect()
         mAdapter.renewDatas(itemDatas)
         AppController.instance.checkedBLE = ArrayList<BluetoothDevice>()
+
+
+        //val testset = AppController.instance.checkedBLE
+
 
         scanLeDevice(true)
 
@@ -310,6 +313,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             val scanSettings = mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(0).build()
 
 
+
             mScanning = true
             mBluetoothLeScanner.startScan(filters, scanSettings, leScanCallback)
         } else {
@@ -340,9 +344,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 } else if (device.bondState == BluetoothDevice.BOND_NONE) {
                     if(pairDevice(device)) {
-                        mAdapter.setOnlineCheck(device)
-                        if(!AppController.instance.checkedBLE.any{it -> it.address == device.address}) {
-                            AppController.instance.checkedBLE.add(device)
+                        if(device.bondState == BluetoothDevice.BOND_BONDED || device.bondState == BluetoothDevice.BOND_BONDING) {
+                            mAdapter.setOnlineCheck(device)
+                            if(!AppController.instance.checkedBLE.any{it -> it.address == device.address}) {
+                                AppController.instance.checkedBLE.add(device)
+                            }
                         }
                     }
                 }
@@ -467,20 +473,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             if (action == BluetoothDevice.ACTION_PAIRING_REQUEST) {
                 try {
                     val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                    val pin = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 1234)
+
                     //the pin in case you need to accept for an specific pin
-                    Log.i(
-                        "myTag",
-                        "Start Auto Pairing. PIN = " + intent.getIntExtra(
-                            "android.bluetooth.device.extra.PAIRING_KEY",
-                            1234
-                        )
-                    )
-                    val pinBytes: ByteArray
-                    pinBytes = ("" + pin).toByteArray(charset("UTF-8"))
-                    device.setPin(pinBytes)
+
+                    val PIN : String = "123400"
+                    device.setPin(PIN.toByteArray())
                     //setPairing confirmation if neeeded
                     device.setPairingConfirmation(true)
+                    abortBroadcast()
+
                 } catch (e: Exception) {
                     Log.i("myTag", "Error occurs when trying to auto pair")
                     e.printStackTrace()
@@ -491,6 +492,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
                 val prev_state = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
 
+                val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                /*
+                if(device.bondState != 12) {
+                    pairDevice(device)
+                }
+
+                 */
                 if((state == BluetoothDevice.BOND_BONDED && prev_state == BluetoothDevice.BOND_BONDING) || state == BluetoothDevice.BOND_BONDED) {
                     Log.d("PairingRequest", "Paired")
 
