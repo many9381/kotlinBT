@@ -67,22 +67,10 @@ class DeviceSearchActivity : AppCompatActivity() {
             if (action == BluetoothDevice.ACTION_PAIRING_REQUEST) {
                 try {
                     val device = intent.getParcelableExtra<BluetoothDevice>(EXTRA_DEVICE)
-                    val pin = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 1234)
+                    val pin = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 0)
 
-                    /*
-                    //the pin in case you need to accept for an specific pin
-                    Log.i(
-                        "myTag",
-                        "Start Auto Pairing. PIN = " + intent.getIntExtra(
-                            "android.bluetooth.device.extra.PAIRING_KEY",
-                            1234
-                        )
-                    )
-
-                     */
-
-                    val PIN : String = "123400"
-                    device.setPin(PIN.toByteArray())
+                    val pinByte: ByteArray = (""+pin).toByteArray(Charsets.UTF_8)
+                    device.setPin(pinByte)
                     //setPairing confirmation if neeeded
                     device.setPairingConfirmation(true)
                     abortBroadcast()
@@ -292,8 +280,9 @@ class DeviceSearchActivity : AppCompatActivity() {
                 val address = inputData.identNum
                 val device = mBluetoothAdapter.getRemoteDevice(address)
 
-                unpairDevice(device)
+                //unpairDevice(device)
 
+                mBluetoothAdapter.cancelDiscovery()
                 if(pairDevice(device)) {
                     mDbOpenHelper.DbInsert(inputData)
                     Toast.makeText(applicationContext, "등록 완료", Toast.LENGTH_SHORT).show()
@@ -306,6 +295,7 @@ class DeviceSearchActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext, "페어링 실패 다시시도하세요", Toast.LENGTH_SHORT).show()
                 }
                 //bluetoothGatt = device.connectGatt(this, false, gattCallback)
+                mBluetoothAdapter.startDiscovery()
 
 
             }

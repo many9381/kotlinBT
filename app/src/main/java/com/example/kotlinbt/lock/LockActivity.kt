@@ -232,6 +232,7 @@ class LockActivity : AppCompatActivity() {
 
         Log.d("lock_destroy", "connected device : " + connectedDevices.size )
 
+
         for(device in connectedDevices) {
             //device.disconnect()
             val job = CoroutineScope(Dispatchers.Default).launch {
@@ -239,10 +240,12 @@ class LockActivity : AppCompatActivity() {
                 //device.disconnect()
                 //device.close()
                 device.disconnect()
-                Log.d("Lock_Destroy", "disconnect !! : " + device.device.name)
-                delay(1000)
+
+                Log.d("Lock_Destroy", "disconnect !! : ${device.device.name} ")
+                delay(4000)
+                Log.d("Lock_Destroy", "closed !! : ${device.device.name}")
                 device.close()
-                Log.d("Lock_Destroy", "closed !! : " + device.device.name)
+
             }
         }
 

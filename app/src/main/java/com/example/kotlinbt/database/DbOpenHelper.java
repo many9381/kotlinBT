@@ -133,6 +133,7 @@ public class DbOpenHelper {
 
         }
 
+        c.close();
 
         return itemDatas;
     }
@@ -154,6 +155,7 @@ public class DbOpenHelper {
 
         }
 
+       c.close();
 
         return item;
     }
@@ -176,6 +178,7 @@ public class DbOpenHelper {
 
         }
 
+        c.close();
 
         return item;
     }
@@ -199,6 +202,7 @@ public class DbOpenHelper {
 
         }
 
+        c.close();
 
         return itemDatas;
     }

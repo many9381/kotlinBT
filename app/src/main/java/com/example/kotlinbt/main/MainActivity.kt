@@ -202,6 +202,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         AppController.instance.checkedBLE = ArrayList<BluetoothDevice>()
 
 
+
         //val testset = AppController.instance.checkedBLE
 
 
@@ -332,10 +333,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             val device = result.device
             if (mDbOpenHelper.DbFind(device.address) != null) {
 
-                Log.d("LeScanCallback", "UUID : " + device.name)
-                Log.d("LeScanCallback", "ADDRESS : " + device.address)
-                Log.d("LeScanCallback", "BONDSTATE : " + device.bondState)
-
                 if (device.bondState == BluetoothDevice.BOND_BONDING || device.bondState == BluetoothDevice.BOND_BONDED) {
                     mAdapter.setOnline(device.address)
                     if(!AppController.instance.checkedBLE.any{it -> it.address == device.address}) {
@@ -343,6 +340,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     }
 
                 } else if (device.bondState == BluetoothDevice.BOND_NONE) {
+
+                    Log.d("LeScanCallback", "UUID : " + device.name)
+                    Log.d("LeScanCallback", "ADDRESS : " + device.address)
+                    Log.d("LeScanCallback", "BONDSTATE : " + device.bondState)
+
                     if(pairDevice(device)) {
                         if(device.bondState == BluetoothDevice.BOND_BONDED || device.bondState == BluetoothDevice.BOND_BONDING) {
                             mAdapter.setOnlineCheck(device)
@@ -368,71 +370,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             Log.d("LeScan Failed", "Err Code : $errorCode")
         }
     }
-
-
-
-    /*{ device, rssi, scanRecord ->
-        runOnUiThread {
-
-            if (mDbOpenHelper.DbFind(device.address) != null) {
-                //if (mDbOpenHelper.DbFind(device.address) == null) {
-
-                //Log.i("mLeScanCallback", "status : " + device.bondState)
-
-                Log.d("LeScanCallback", "UUID : " + device.name)
-                Log.d("LeScanCallback", "ADDRESS : " + device.address)
-                Log.d("LeScanCallback", "BONDSTATE : " + device.bondState)
-
-
-                if (device.bondState == BluetoothDevice.BOND_BONDING || device.bondState == BluetoothDevice.BOND_BONDED) {
-                    mAdapter.setOnline(device.address)
-                    //checkedDevices.pairedDeviceObject.add(device)
-
-                    /*
-                    var flag = true
-                    for(dev in AppController.instance.checkedDevice) {
-                            if(dev.address == device.address) {
-                                flag = false
-                                break
-                            }
-                    }
-                    if(flag) {
-                        AppController.instance.checkedDevice.add(device)
-                    }
-                     */
-
-
-                } else if (device.bondState == BluetoothDevice.BOND_NONE) {
-                    if(pairDevice(device)) {
-                        //checkedDevices.pairedDeviceObject.add(device)
-                        /*
-                        var flag = true
-                        for(dev in AppController.instance.checkedDevice) {
-                            if(dev.address == device.address) {
-                                flag = false
-                                break
-                            }
-                        }
-                        if(flag) {
-                            AppController.instance.checkedDevice.add(device)
-                        }
-
-                         */
-                        mAdapter.setOnlineCheck(device)
-                    }
-                }
-
-            }
-
-
-        }
-
-    }
-
-     */
-
-
-    fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
 
     private fun unpairDevice(device: BluetoothDevice) {
@@ -476,9 +413,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                     //the pin in case you need to accept for an specific pin
 
-                    val PIN : String = "123400"
-                    device.setPin(PIN.toByteArray())
-                    //setPairing confirmation if neeeded
+                    val pin = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 0)
+
+                    val pinByte: ByteArray = (""+pin).toByteArray(Charsets.UTF_8)
+                    device.setPin(pinByte)
                     device.setPairingConfirmation(true)
                     abortBroadcast()
 
