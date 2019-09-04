@@ -36,16 +36,16 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-mdpi-v4/abc_ic_menu_share_mtrl_alpha.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_ic_star_half_black_36dp.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_ic_star_half_black_36dp.png"
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_btn_radio_to_on_mtrl_000.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_btn_radio_to_on_mtrl_000.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-mdpi-v4_notify_panel_notification_icon_bg.png.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/31b52c28f15bbd01c23bcce9bd5a2da1/support-compat-27.1.1/res/drawable-mdpi-v4/notify_panel_notification_icon_bg.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_btn_radio_to_on_mtrl_000.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_btn_radio_to_on_mtrl_000.png"
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_ic_star_half_black_36dp.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_ic_star_half_black_36dp.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/layout_abc_alert_dialog_title_material.xml.flat",
@@ -80,12 +80,12 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/color-v23/abc_tint_switch_track.xml"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/color-v23_abc_tint_seek_thumb.xml.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/color-v23/abc_tint_seek_thumb.xml"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-ldrtl-mdpi-v17_abc_ic_menu_cut_mtrl_alpha.png.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-ldrtl-mdpi-v17/abc_ic_menu_cut_mtrl_alpha.png"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/color-v23_abc_tint_seek_thumb.xml.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/color-v23/abc_tint_seek_thumb.xml"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/mipmap-xxhdpi_ic_launcher_round.png.flat",
@@ -140,12 +140,12 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-ldrtl-xxhdpi-v17/abc_ic_menu_cut_mtrl_alpha.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_textfield_search_default_mtrl_alpha.9.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_textfield_search_default_mtrl_alpha.9.png"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/layout_abc_activity_chooser_view.xml.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/layout/abc_activity_chooser_view.xml"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_textfield_search_default_mtrl_alpha.9.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_textfield_search_default_mtrl_alpha.9.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-mdpi-v4_abc_popup_background_mtrl_mult.9.png.flat",
@@ -176,12 +176,12 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxxhdpi-v4/abc_text_select_handle_right_mtrl_dark.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_scrubber_track_mtrl_alpha.9.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_scrubber_track_mtrl_alpha.9.png"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_text_select_handle_left_mtrl_dark.png.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_text_select_handle_left_mtrl_dark.png"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_scrubber_track_mtrl_alpha.9.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_scrubber_track_mtrl_alpha.9.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-mdpi-v4_abc_menu_hardkey_panel_mtrl_mult.9.png.flat",
@@ -196,16 +196,16 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-ldrtl-mdpi-v17/abc_spinner_mtrl_am_alpha.9.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_abc_text_select_handle_right_mtrl_dark.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xhdpi-v4/abc_text_select_handle_right_mtrl_dark.png"
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_abc_ic_star_black_36dp.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xhdpi-v4/abc_ic_star_black_36dp.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_scrubber_primary_mtrl_alpha.9.png.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_scrubber_primary_mtrl_alpha.9.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_abc_ic_star_black_36dp.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xhdpi-v4/abc_ic_star_black_36dp.png"
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_abc_text_select_handle_right_mtrl_dark.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xhdpi-v4/abc_text_select_handle_right_mtrl_dark.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable_abc_text_cursor_material.xml.flat",
@@ -240,12 +240,12 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/layout/abc_screen_simple_overlay_action_mode.xml"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_btn_check_to_on_mtrl_015.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_btn_check_to_on_mtrl_015.png"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_ic_menu_selectall_mtrl_alpha.png.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_ic_menu_selectall_mtrl_alpha.png"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_btn_check_to_on_mtrl_015.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_btn_check_to_on_mtrl_015.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-mdpi-v4_abc_ic_commit_search_api_mtrl_alpha.png.flat",
@@ -404,12 +404,12 @@
         "source": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_abc_textfield_search_activated_mtrl_alpha.9.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xhdpi-v4/abc_textfield_search_activated_mtrl_alpha.9.png"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxxhdpi-v4_abc_btn_check_to_on_mtrl_015.png.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxxhdpi-v4/abc_btn_check_to_on_mtrl_015.png"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_abc_textfield_search_activated_mtrl_alpha.9.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xhdpi-v4/abc_textfield_search_activated_mtrl_alpha.9.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xxhdpi-v4_abc_ic_menu_cut_mtrl_alpha.png.flat",
@@ -444,12 +444,12 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxhdpi-v4/abc_btn_radio_to_on_mtrl_015.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_ic_star_half_black_48dp.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_ic_star_half_black_48dp.png"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/layout_actionbar_indeterminate_progress.xml.flat",
         "source": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/res/layout/actionbar_indeterminate_progress.xml"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_ic_star_half_black_48dp.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_ic_star_half_black_48dp.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable_abc_item_background_holo_light.xml.flat",
@@ -516,12 +516,12 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/color/abc_background_cache_hint_selector_material_dark.xml"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_notify_panel_notification_icon_bg.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/31b52c28f15bbd01c23bcce9bd5a2da1/support-compat-27.1.1/res/drawable-xhdpi-v4/notify_panel_notification_icon_bg.png"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-v24_border_circle_background_empty.xml.flat",
         "source": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/res/drawable-v24/border_circle_background_empty.xml"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_notify_panel_notification_icon_bg.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/31b52c28f15bbd01c23bcce9bd5a2da1/support-compat-27.1.1/res/drawable-xhdpi-v4/notify_panel_notification_icon_bg.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-xhdpi-v4_abc_ic_menu_paste_mtrl_am_alpha.png.flat",
@@ -624,12 +624,12 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxxhdpi-v4/abc_ic_star_half_black_16dp.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-mdpi-v4_abc_ic_star_half_black_36dp.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-mdpi-v4/abc_ic_star_half_black_36dp.png"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/layout_abc_alert_dialog_button_bar_material.xml.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/layout/abc_alert_dialog_button_bar_material.xml"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-mdpi-v4_abc_ic_star_half_black_36dp.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-mdpi-v4/abc_ic_star_half_black_36dp.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/anim_abc_popup_exit.xml.flat",
@@ -668,12 +668,12 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xhdpi-v4/abc_list_pressed_holo_light.9.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable_notification_bg_low.xml.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/31b52c28f15bbd01c23bcce9bd5a2da1/support-compat-27.1.1/res/drawable/notification_bg_low.xml"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable_unlock.png.flat",
         "source": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/res/drawable/unlock.png"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable_notification_bg_low.xml.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/31b52c28f15bbd01c23bcce9bd5a2da1/support-compat-27.1.1/res/drawable/notification_bg_low.xml"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/layout-v21_notification_action_tombstone.xml.flat",
@@ -740,20 +740,20 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-xxxhdpi-v4/abc_ic_star_black_16dp.png"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_text_select_handle_middle_mtrl_dark.png.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_text_select_handle_middle_mtrl_dark.png"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/layout_notification_template_part_chronometer.xml.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/31b52c28f15bbd01c23bcce9bd5a2da1/support-compat-27.1.1/res/layout/notification_template_part_chronometer.xml"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable_abc_switch_thumb_material.xml.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable/abc_switch_thumb_material.xml"
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_text_select_handle_middle_mtrl_dark.png.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_text_select_handle_middle_mtrl_dark.png"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_scrubber_track_mtrl_alpha.9.png.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_scrubber_track_mtrl_alpha.9.png"
+    },
+    {
+        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable_abc_switch_thumb_material.xml.flat",
+        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable/abc_switch_thumb_material.xml"
     },
     {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/color_abc_hint_foreground_material_light.xml.flat",

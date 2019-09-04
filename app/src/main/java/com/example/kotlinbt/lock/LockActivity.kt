@@ -264,13 +264,21 @@ class LockActivity : AppCompatActivity() {
         val testset = mBluetoothAdapter.bondedDevices
         //val testset = AppController.instance.checkedBLE
 
+        /*
         for(device in testset) {
             val job = CoroutineScope(Dispatchers.Default).launch {
                 device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
                 Log.d("Coroutine", "device : " + device.address)
-                delay(60)
+                delay(400)
             }
 
+        }
+
+         */
+
+        for(device in testset) {
+                device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+                Log.d("Single_connect", "device : " + device.address)
         }
 
 

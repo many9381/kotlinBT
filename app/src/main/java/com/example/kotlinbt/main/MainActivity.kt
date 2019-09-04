@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mBluetoothManager = AppController.instance.mBluetoothManager
         mBluetoothAdapter = AppController.instance.mBluetoothAdapter
         mBluetoothLeScanner = AppController.instance.mBluetoothLeScanner
-        mBluetoothAdapter.cancelDiscovery()
+        //mBluetoothAdapter.cancelDiscovery()
 
 
         mAdapter = MainAdapter(itemDatas, this, obj)
@@ -238,7 +238,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.unlockArea -> {
                 scanLeDevice(false)
                 val intent: Intent = Intent(this, LockActivity::class.java)
-                Log.d("Maininstance", "checkBLE : ${AppController.instance.checkedBLE.size}")
                 startActivity(intent)
             }
 
@@ -341,18 +340,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 } else if (device.bondState == BluetoothDevice.BOND_NONE) {
 
-                    Log.d("LeScanCallback", "UUID : " + device.name)
-                    Log.d("LeScanCallback", "ADDRESS : " + device.address)
-                    Log.d("LeScanCallback", "BONDSTATE : " + device.bondState)
-
                     if(pairDevice(device)) {
+
+                        /*
                         if(device.bondState == BluetoothDevice.BOND_BONDED || device.bondState == BluetoothDevice.BOND_BONDING) {
                             mAdapter.setOnlineCheck(device)
                             if(!AppController.instance.checkedBLE.any{it -> it.address == device.address}) {
                                 AppController.instance.checkedBLE.add(device)
                             }
                         }
+                         */
+                        Log.d("LeScanCallback", "UUID : " + device.name)
+                        Log.d("LeScanCallback", "ADDRESS : " + device.address)
+                        Log.d("LeScanCallback", "BONDSTATE : " + device.bondState)
+
                     }
+
                 }
 
             }
@@ -381,12 +384,76 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         //Log.i("MainActivity-Pairing", "name : " + device.getName().toString())
         //Log.i("MainActivity-Pairing", "address : " + device.getAddress().toString())
 
+
+        val mGatt = device.connectGatt(this, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+        mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
         val bondresult = device.createBond()
 
         Log.i("MainActivity-Pairing", "Bondresult : " + bondresult)
 
 
         return bondresult
+
+    }
+
+
+    private val pairedDevices= mutableListOf<BluetoothGatt>()
+
+    private val STATE_DISCONNECTED = 0
+    private val STATE_CONNECTING = 1
+    private val STATE_CONNECTED = 2
+    val ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED"
+    val ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED"
+    val ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED"
+    val ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE"
+    val EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA"
+    private var connectionState = STATE_DISCONNECTED
+    private val gattCallback = object : BluetoothGattCallback()  {
+        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+            val intentAction: String
+
+
+
+            when (newState) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    intentAction = ACTION_GATT_CONNECTED
+                    connectionState = STATE_CONNECTED
+
+                    //val inputData = ItemData(0, gatt.device.name, gatt.device.address, 0)
+                    //mDbOpenHelper.DbInsert(inputData)
+
+
+                    Log.i("Main_GATT", "Connected to GATT server.")
+
+                    pairedDevices.add(gatt)
+                    //gatt.requestMtu(20)
+                    //disconnectGatt()
+                    broadcastUpdate(intentAction)
+                    gatt.disconnect()
+
+                    //gatt.close()
+                }
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    intentAction = ACTION_GATT_DISCONNECTED
+                    connectionState = STATE_DISCONNECTED
+                    Log.i("Main_GATT", "Disconnected from GATT server.")
+                    //unpairDevice(gatt.device)
+                    gatt.close()
+
+                    broadcastUpdate(intentAction)
+                }
+
+
+
+            }
+
+
+        }
+
+        private fun broadcastUpdate(action: String) {
+            val intent = Intent(action)
+            sendBroadcast(intent)
+        }
 
     }
 

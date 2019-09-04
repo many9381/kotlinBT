@@ -1,7 +1,0 @@
-#Mon Sep 02 01:21:01 KST 2019
-base.0=/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/dex/debugAndroidTest/mergeExtDexDebugAndroidTest/out/classes.dex
-path.1=classes.dex
-renamed.1=classes2.dex
-path.0=classes.dex
-renamed.0=classes.dex
-base.1=/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/dex/debugAndroidTest/mergeProjectDexDebugAndroidTest/out/classes.dex
