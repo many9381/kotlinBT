@@ -310,6 +310,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
             val mScanSettingBuilder = ScanSettings.Builder()
             val filters : List<ScanFilter> = ArrayList<ScanFilter>()
+            //val scanSettings = mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(10).setLegacy(false).setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED).build()
             val scanSettings = mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(0).build()
 
 
@@ -364,7 +365,46 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         override fun onBatchScanResults(results: MutableList<ScanResult>?) {
             super.onBatchScanResults(results)
 
-            Log.d("test", "onBatchScanResults!!")
+
+
+            results!!.forEach {
+
+
+
+                val device = it.device
+                Log.d("onBatchScanResult", "device : ${device.name}")
+
+                if (mDbOpenHelper.DbFind(device.address) != null) {
+
+                    if (device.bondState == BluetoothDevice.BOND_BONDING || device.bondState == BluetoothDevice.BOND_BONDED) {
+                        mAdapter.setOnline(device.address)
+                        if(!AppController.instance.checkedBLE.any{it -> it.address == device.address}) {
+                            AppController.instance.checkedBLE.add(device)
+                        }
+
+                    } else if (device.bondState == BluetoothDevice.BOND_NONE) {
+
+                        if(pairDevice(device)) {
+
+                            /*
+                            if(device.bondState == BluetoothDevice.BOND_BONDED || device.bondState == BluetoothDevice.BOND_BONDING) {
+                                mAdapter.setOnlineCheck(device)
+                                if(!AppController.instance.checkedBLE.any{it -> it.address == device.address}) {
+                                    AppController.instance.checkedBLE.add(device)
+                                }
+                            }
+                             */
+                            Log.d("LeScanCallback", "UUID : " + device.name)
+                            Log.d("LeScanCallback", "ADDRESS : " + device.address)
+                            Log.d("LeScanCallback", "BONDSTATE : " + device.bondState)
+
+                        }
+
+                    }
+                }
+
+            }
+
         }
 
         override fun onScanFailed(errorCode: Int) {
@@ -385,8 +425,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         //Log.i("MainActivity-Pairing", "address : " + device.getAddress().toString())
 
 
-        val mGatt = device.connectGatt(this, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+       /*
+       val mGatt = device.connectGatt(this, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+
         mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+         */
         val bondresult = device.createBond()
 
         Log.i("MainActivity-Pairing", "Bondresult : " + bondresult)

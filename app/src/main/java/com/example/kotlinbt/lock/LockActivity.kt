@@ -242,7 +242,7 @@ class LockActivity : AppCompatActivity() {
                 device.disconnect()
 
                 Log.d("Lock_Destroy", "disconnect !! : ${device.device.name} ")
-                delay(4000)
+                delay(2000)
                 Log.d("Lock_Destroy", "closed !! : ${device.device.name}")
                 device.close()
 
@@ -264,22 +264,31 @@ class LockActivity : AppCompatActivity() {
         val testset = mBluetoothAdapter.bondedDevices
         //val testset = AppController.instance.checkedBLE
 
-        /*
+
+
         for(device in testset) {
             val job = CoroutineScope(Dispatchers.Default).launch {
-                device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+
+                //delay(50)
+                val gatt = device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+
                 Log.d("Coroutine", "device : " + device.address)
-                delay(400)
+
+                }
+
             }
 
-        }
 
-         */
 
+
+        /*
         for(device in testset) {
                 device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
                 Log.d("Single_connect", "device : " + device.address)
         }
+
+         */
+
 
 
 

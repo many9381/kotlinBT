@@ -532,10 +532,6 @@
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-v23/abc_control_background_material.xml"
     },
     {
-        "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/layout_abc_screen_toolbar.xml.flat",
-        "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/layout/abc_screen_toolbar.xml"
-    },
-    {
         "merged": "/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/res/merged/debug/drawable-hdpi-v4_abc_ic_menu_cut_mtrl_alpha.png.flat",
         "source": "/Users/many/.gradle/caches/transforms-2/files-2.1/2a048626e4f3e0d57d18153ee4393241/appcompat-v7-27.1.1/res/drawable-hdpi-v4/abc_ic_menu_cut_mtrl_alpha.png"
     },

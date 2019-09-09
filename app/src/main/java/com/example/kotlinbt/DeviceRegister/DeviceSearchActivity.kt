@@ -60,16 +60,16 @@ class DeviceSearchActivity : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
 
-            Log.i("myTag", "get Action : " + action!!)
-            Log.i("myTag", "get Action : " + action)
             Log.i("myTag", "get Action : " + action)
 
             if (action == BluetoothDevice.ACTION_PAIRING_REQUEST) {
+
                 try {
                     val device = intent.getParcelableExtra<BluetoothDevice>(EXTRA_DEVICE)
                     val pin = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 0)
 
                     val pinByte: ByteArray = (""+pin).toByteArray(Charsets.UTF_8)
+                    Log.i("myTag", "dev_pair : ${device}" )
                     device.setPin(pinByte)
                     //setPairing confirmation if neeeded
                     device.setPairingConfirmation(true)
@@ -85,6 +85,8 @@ class DeviceSearchActivity : AppCompatActivity() {
                 val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
                 val prev_state = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
 
+                Log.i("myTag", "Bond_State : ${state}")
+
                 val device = intent.getParcelableExtra<BluetoothDevice>(EXTRA_DEVICE)
 
                 /*
@@ -95,6 +97,9 @@ class DeviceSearchActivity : AppCompatActivity() {
                  */
                 if((state == BluetoothDevice.BOND_BONDED && prev_state == BluetoothDevice.BOND_BONDING) || state == BluetoothDevice.BOND_BONDED) {
                     Log.d("PairingRequest", "Paired")
+                    val inputData = ItemData(0, device.name, device.address, 0)
+                    mDbOpenHelper.DbInsert(inputData)
+
 
                 }
                 else if (state == BluetoothDevice.BOND_NONE && prev_state == BluetoothDevice.BOND_BONDED){
@@ -103,6 +108,12 @@ class DeviceSearchActivity : AppCompatActivity() {
                 else {
                     Log.d("PairingRequest", "${state}")
                 }
+            }
+            else if(action == BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED) {
+
+                val device = intent.getParcelableExtra<BluetoothDevice>(EXTRA_DEVICE)
+                Log.d("PairingRequest", "Disconnect_Request : ${device}")
+
             }
 
         }
@@ -160,6 +171,7 @@ class DeviceSearchActivity : AppCompatActivity() {
 
         val filter = IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST)
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED)
         filter.priority = IntentFilter.SYSTEM_HIGH_PRIORITY
         registerReceiver(mPairingRequestReceiver, filter)
 
@@ -212,6 +224,8 @@ class DeviceSearchActivity : AppCompatActivity() {
             if (mDbOpenHelper.DbFind(device.address) != null) {
                 Toast.makeText(applicationContext, "이미 등록된 장치입니다.", Toast.LENGTH_SHORT).show()
             } else {
+
+
                 val inputData = ItemData(0, device.name, device.address, 0)
                 registerDevice(inputData)
             }
@@ -233,6 +247,9 @@ class DeviceSearchActivity : AppCompatActivity() {
         super.onDestroy()
 
 
+
+
+        /*
         for(device in pairedDevices) {
             val job = Job()
             CoroutineScope(Dispatchers.Default).launch {
@@ -246,18 +263,31 @@ class DeviceSearchActivity : AppCompatActivity() {
             }
         }
 
-        /*
-        val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+         */
 
-        val connectedDevices : List<BluetoothDevice>? = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
+
+        //val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val connectedDevices = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT)
 
         connectedDevices!!.forEach {
 
             val device = mBluetoothAdapter.getRemoteDevice(it.toString())
+            Log.d("Search_Destroy", "${it.name} : ${it.bondState}")
 
         }
 
-         */
+        val bondedDevices = mBluetoothAdapter.bondedDevices
+
+        bondedDevices.forEach {
+
+            val device = mBluetoothAdapter.getRemoteDevice(it.toString())
+            val connResult = mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT)
+            Log.d("Search_Destroy", "${it.name} : ${it.bondState}")
+            Log.d("Search_Destroy", "${it.name} conResult : ${connResult}")
+
+        }
+
+
 
         unregisterReceiver(mPairingRequestReceiver)
     }
@@ -278,12 +308,14 @@ class DeviceSearchActivity : AppCompatActivity() {
                  * 연결 시도
                  */
 
+                mBluetoothAdapter.cancelDiscovery()
+                scanLeDevice(false)
+
                 val address = inputData.identNum
                 val device = mBluetoothAdapter.getRemoteDevice(address)
 
                 //unpairDevice(device)
 
-                //mBluetoothAdapter.cancelDiscovery()
                 if(pairDevice(device)) {
 
                     //Log.i("registerDevice", "disconnect")
@@ -296,7 +328,7 @@ class DeviceSearchActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext, "페어링 실패 다시시도하세요", Toast.LENGTH_SHORT).show()
                 }
                 //bluetoothGatt = device.connectGatt(this, false, gattCallback)
-                //mBluetoothAdapter.startDiscovery()
+                mBluetoothAdapter.startDiscovery()
 
 
             }
@@ -388,7 +420,8 @@ class DeviceSearchActivity : AppCompatActivity() {
             val filters : List<ScanFilter> = ArrayList<ScanFilter>()
             mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
             mScanSettingBuilder.setReportDelay(0)
-            mScanSettingBuilder.setLegacy(true)
+            mScanSettingBuilder.setLegacy(false)
+            //mScanSettingBuilder.setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
 
             val scanSettings = mScanSettingBuilder.build()
 
@@ -448,8 +481,8 @@ class DeviceSearchActivity : AppCompatActivity() {
         Log.i("SearchActivity-Pairing", "name : " + device.getName().toString())
         Log.i("SearchActivity-Pairing", "address : " + device.getAddress().toString())
 
-        val mGatt = device.connectGatt(this, false, gattCallback, TRANSPORT_LE)
-        mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+        //val mGatt = device.connectGatt(this, false, gattCallback, TRANSPORT_LE)
+        //mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
         val bondresult = device.createBond()
 
 
@@ -464,4 +497,5 @@ class DeviceSearchActivity : AppCompatActivity() {
         device::class.java.getMethod("removeBond").invoke(device)
 
     }
+
 }

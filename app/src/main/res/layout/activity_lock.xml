@@ -13,7 +13,8 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:orientation="vertical"
-			android:gravity="center_horizontal">
+			android:gravity="center_horizontal"
+			android:weightSum="18">
 
 		<ImageView
 				android:id="@+id/stateImg"
@@ -40,11 +41,12 @@
 
 		<ScrollView
 				android:layout_width="match_parent"
-				android:layout_height="150dp"
+				android:layout_height="match_parent"
 				android:paddingLeft="30dp"
 				android:paddingTop="10dp"
 				android:paddingRight="30dp"
-				android:paddingBottom="10dp">
+				android:paddingBottom="10dp"
+				android:layout_weight="7">
 
 			<LinearLayout
 					android:id="@+id/logArea"
@@ -57,7 +59,7 @@
 						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
 						android:text="Log Area"
-						android:textSize="12sp"/>
+						android:textSize="12sp" />
 
 			</LinearLayout>
 
@@ -68,6 +70,7 @@
 				android:layout_height="match_parent"
 				android:paddingLeft="20dp"
 				android:paddingRight="20dp"
+				android:layout_weight="11"
 				android:weightSum="9">
 
 			<LinearLayout
