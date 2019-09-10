@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:dist="http://schemas.android.com/apk/distribution"
-          package="com.example.kotlinbt">
+		xmlns:dist="http://schemas.android.com/apk/distribution"
+		package="com.example.kotlinbt">
 
-	<dist:module dist:instant="true"/>
+	<dist:module dist:instant="true" />
 
-	<uses-permission android:name="android.permission.BLUETOOTH"/>
-	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-	<uses-permission android:name="android.Manifest.permission.ACCESS_FINE_LOCATION"/>
-	<uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"/>
+	<uses-permission android:name="android.permission.BLUETOOTH" />
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.Manifest.permission.ACCESS_FINE_LOCATION" />
+
 
 	<application
-
 			android:name=".Application.AppController"
 			android:allowBackup="true"
 			android:icon="@mipmap/ic_launcher"
@@ -20,26 +19,23 @@
 			android:roundIcon="@mipmap/ic_launcher_round"
 			android:supportsRtl="true"
 			android:theme="@style/AppTheme">
+		<service
+				android:name=".main.advertisement.AdvertiseService"
+				android:enabled="true"
+				android:exported="true"></service>
 
-
-
-		<activity android:name=".lock.LockActivity">
-		</activity>
-		<activity android:name=".condition.ConditionActivity">
-		</activity>
+		<activity android:name=".lock.LockActivity"></activity>
+		<activity android:name=".condition.ConditionActivity"></activity>
 		<activity
 				android:name=".main.MainActivity"
 				android:theme="@style/AppTheme.NoActionBar">
 			<intent-filter>
-				<action android:name="android.intent.action.MAIN"/>
+				<action android:name="android.intent.action.MAIN" />
 
-				<category android:name="android.intent.category.LAUNCHER"/>
+				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name=".DeviceRegister.DeviceSearchActivity">
-		</activity>
-
-		<service android:name=".bluetooth.BluetoothLeService"/>
+		<activity android:name=".DeviceRegister.DeviceSearchActivity"></activity>
 
 	</application>
 

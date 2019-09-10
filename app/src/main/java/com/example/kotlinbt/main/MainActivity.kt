@@ -36,6 +36,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.ArrayList
 
+import com.example.kotlinbt.main.advertisement.AdvertiseService
+
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -208,6 +210,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         scanLeDevice(true)
 
+        val intent = Intent(this, AdvertiseService::class.java)
+        //startService(intent)
+        startForegroundService(intent)
+
 
     }
 
@@ -220,6 +226,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onStop()
         scanLeDevice(false)
         unregisterReceiver(mPairingRequestReceiver)
+        val intent = Intent(this, AdvertiseService::class.java)
+        stopService(intent)
+
     }
 
     // onClick Functions

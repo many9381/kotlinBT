@@ -16,7 +16,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.Manifest.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
 
     <application
         android:name="com.example.kotlinbt.Application.AppController"
@@ -28,10 +27,13 @@
         android:supportsRtl="true"
         android:testOnly="true"
         android:theme="@style/AppTheme" >
-        <activity android:name="com.example.kotlinbt.lock.LockActivity" >
-        </activity>
-        <activity android:name="com.example.kotlinbt.condition.ConditionActivity" >
-        </activity>
+        <service
+            android:name="com.example.kotlinbt.main.advertisement.AdvertiseService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name="com.example.kotlinbt.lock.LockActivity" />
+        <activity android:name="com.example.kotlinbt.condition.ConditionActivity" />
         <activity
             android:name="com.example.kotlinbt.main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" >
@@ -41,10 +43,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.kotlinbt.DeviceRegister.DeviceSearchActivity" >
-        </activity>
-
-        <service android:name="com.example.kotlinbt.bluetooth.BluetoothLeService" />
+        <activity android:name="com.example.kotlinbt.DeviceRegister.DeviceSearchActivity" />
     </application>
 
 </manifest>
