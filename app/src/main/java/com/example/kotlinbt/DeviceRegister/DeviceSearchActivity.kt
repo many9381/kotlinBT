@@ -72,7 +72,7 @@ class DeviceSearchActivity : AppCompatActivity() {
                     Log.i("myTag", "dev_pair : ${device}" )
                     device.setPin(pinByte)
                     //setPairing confirmation if neeeded
-                    device.setPairingConfirmation(true)
+                    //device.setPairingConfirmation(true)
                     abortBroadcast()
 
                 } catch (e: Exception) {

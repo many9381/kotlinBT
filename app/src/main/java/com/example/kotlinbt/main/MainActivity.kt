@@ -196,6 +196,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onResume()
 
         val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST)
         registerReceiver(mPairingRequestReceiver, filter)
 
         //recyclerview add item
@@ -225,7 +226,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onStop() {
         super.onStop()
         scanLeDevice(false)
-        unregisterReceiver(mPairingRequestReceiver)
+
         val intent = Intent(this, AdvertiseService::class.java)
         stopService(intent)
 
@@ -237,6 +238,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             R.id.deviceRegisterArea -> {
                 scanLeDevice(false)
                 val intent = Intent(this, DeviceSearchActivity::class.java)
+                unregisterReceiver(mPairingRequestReceiver)
                 startActivity(intent)
             }
             R.id.conditionRegisterArea -> {
@@ -536,7 +538,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                     val pinByte: ByteArray = (""+pin).toByteArray(Charsets.UTF_8)
                     device.setPin(pinByte)
-                    device.setPairingConfirmation(true)
+                    //device.setPairingConfirmation(true)
                     abortBroadcast()
 
                 } catch (e: Exception) {
@@ -567,6 +569,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     Log.d("PairingRequest", "${state}")
                 }
             }
+
 
         }
     }
