@@ -27,60 +27,63 @@
 17    <uses-permission android:name="android.Manifest.permission.ACCESS_FINE_LOCATION" />
 17-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:11:2-85
 17-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:11:19-82
-18
-19    <application
-19-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:14:2-40:16
-20        android:name="com.example.kotlinbt.Application.AppController"
-20-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:15:4-45
-21        android:allowBackup="true"
-21-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:16:4-30
-22        android:debuggable="true"
-23        android:icon="@mipmap/ic_launcher"
-23-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:17:4-38
-24        android:label="@string/app_name"
-24-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:18:4-36
-25        android:roundIcon="@mipmap/ic_launcher_round"
-25-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:19:4-49
-26        android:supportsRtl="true"
-26-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:20:4-30
-27        android:testOnly="true"
-28        android:theme="@style/AppTheme" >
-28-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:21:4-35
-29        <service
-29-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:22:3-25:39
-30            android:name="com.example.kotlinbt.main.advertisement.AdvertiseService"
-30-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:23:5-56
-31            android:enabled="true"
-31-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:24:5-27
-32            android:exported="true" />
-32-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:25:5-28
-33
-34        <activity android:name="com.example.kotlinbt.lock.LockActivity" />
-34-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:27:3-58
-34-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:27:13-46
-35        <activity android:name="com.example.kotlinbt.condition.ConditionActivity" />
-35-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:28:3-68
-35-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:28:13-56
-36        <activity
-36-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:29:3-37:14
-37            android:name="com.example.kotlinbt.main.MainActivity"
-37-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:30:5-38
-38            android:theme="@style/AppTheme.NoActionBar" >
-38-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:31:5-48
-39            <intent-filter>
-39-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:32:4-36:20
-40                <action android:name="android.intent.action.MAIN" />
-40-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:33:5-57
-40-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:33:13-54
-41
-42                <category android:name="android.intent.category.LAUNCHER" />
-42-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:35:5-65
-42-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:35:15-62
-43            </intent-filter>
-44        </activity>
-45        <activity android:name="com.example.kotlinbt.DeviceRegister.DeviceSearchActivity" />
-45-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:38:3-76
-45-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:38:13-64
-46    </application>
-47
-48</manifest>
+18    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+18-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:14:2-76
+18-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:14:19-73
+19
+20    <application
+20-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:16:2-42:16
+21        android:name="com.example.kotlinbt.Application.AppController"
+21-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:17:4-45
+22        android:allowBackup="true"
+22-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:18:4-30
+23        android:debuggable="true"
+24        android:icon="@mipmap/ic_launcher"
+24-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:19:4-38
+25        android:label="@string/app_name"
+25-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:20:4-36
+26        android:roundIcon="@mipmap/ic_launcher_round"
+26-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:21:4-49
+27        android:supportsRtl="true"
+27-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:22:4-30
+28        android:testOnly="true"
+29        android:theme="@style/AppTheme" >
+29-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:23:4-35
+30        <service
+30-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:24:3-27:39
+31            android:name="com.example.kotlinbt.main.advertisement.AdvertiseService"
+31-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:25:5-56
+32            android:enabled="true"
+32-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:26:5-27
+33            android:exported="true" />
+33-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:27:5-28
+34
+35        <activity android:name="com.example.kotlinbt.lock.LockActivity" />
+35-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:29:3-58
+35-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:29:13-46
+36        <activity android:name="com.example.kotlinbt.condition.ConditionActivity" />
+36-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:30:3-68
+36-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:30:13-56
+37        <activity
+37-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:31:3-39:14
+38            android:name="com.example.kotlinbt.main.MainActivity"
+38-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:32:5-38
+39            android:theme="@style/AppTheme.NoActionBar" >
+39-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:33:5-48
+40            <intent-filter>
+40-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:34:4-38:20
+41                <action android:name="android.intent.action.MAIN" />
+41-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:35:5-57
+41-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:35:13-54
+42
+43                <category android:name="android.intent.category.LAUNCHER" />
+43-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:37:5-65
+43-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:37:15-62
+44            </intent-filter>
+45        </activity>
+46        <activity android:name="com.example.kotlinbt.DeviceRegister.DeviceSearchActivity" />
+46-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:40:3-76
+46-->/Users/many/Desktop/lab/ble_android/KotlinBT/app/src/main/AndroidManifest.xml:40:13-64
+47    </application>
+48
+49</manifest>
