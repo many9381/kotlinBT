@@ -39,7 +39,11 @@ class AdvertiseService : Service() {
 
     private var mBluetoothLeAdvertiser: BluetoothLeAdvertiser? = null
     private var mAdvertiseCallback: AdvertiseCallback? = null
+    /*
     private var mBluetoothManager: BluetoothManager? = null
+
+     */
+
     private lateinit var mHandler: Handler
 
     private var timeoutRunnable: Runnable? = null
@@ -88,19 +92,11 @@ class AdvertiseService : Service() {
     private fun initialize() {
 
         if (mBluetoothLeAdvertiser == null) {
-            //mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            mBluetoothManager = AppController.instance.mBluetoothManager
-            if (mBluetoothManager != null) {
-                //val mBluetoothAdapter = mBluetoothManager?.adapter
-                val mBluetoothAdapter = AppController.instance.mBluetoothAdapter
-                if (mBluetoothAdapter != null) {
-                    mBluetoothLeAdvertiser = mBluetoothAdapter.bluetoothLeAdvertiser
-                } else {
-                    Toast.makeText(this, "bt need", Toast.LENGTH_LONG).show()
-                }
-            } else {
-                Toast.makeText(this, "bt need", Toast.LENGTH_LONG).show()
-            }
+
+            //mBluetoothManager = AppController.instance.mBluetoothManager
+
+            mBluetoothLeAdvertiser = AppController.instance.mBluetoothAdapter.bluetoothLeAdvertiser
+
         }
     }
 

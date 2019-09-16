@@ -1,5 +1,6 @@
 package com.example.kotlinbt.lock
 
+import android.app.Activity
 import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.*
@@ -43,10 +44,11 @@ class LockActivity : AppCompatActivity() {
     lateinit var mDbOpenHelper: DbOpenHelper
 
 
+    /*
     private lateinit var mBluetoothAdapter: BluetoothAdapter
-    private var mBluetoothManager: BluetoothManager? = null
+    private lateinit var mBluetoothManager: BluetoothManager
     private lateinit var mBluetoothLeScanner: BluetoothLeScanner
-
+     */
     lateinit var moduleList: ArrayList<ItemData>
 
 
@@ -65,9 +67,10 @@ class LockActivity : AppCompatActivity() {
         setContentView(R.layout.activity_lock)
 
 
+        /*
         mBluetoothManager = AppController.instance.mBluetoothManager
         mBluetoothAdapter = AppController.instance.mBluetoothAdapter
-
+        */
 
 
         mDbOpenHelper = AppController.instance.mDbOpenHelper
@@ -165,12 +168,17 @@ class LockActivity : AppCompatActivity() {
             if(isPinCheck && countCheck && targetCheck) {
                 addLog("-------- OPEN --------")
 
-                val test = mBluetoothManager?.getConnectedDevices(BluetoothProfile.GATT_SERVER)
+                val test = AppController.instance.mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER)
 
-                AppController.instance.mBluetoothGattServer.cancelConnection(test!![0])
 
+                //@TODO 실제 구현시에는 connection 유지, 인증 실패할 때 connection 종료로 구현해야함.
+
+
+                setResult(Activity.RESULT_OK)
                 stateImg.setImageResource(R.drawable.unlock)
                 isRunning = false
+                AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
+                finish()
             }
 
             if (connectDeviceCount >= connectDeviceMax) {
@@ -265,11 +273,23 @@ class LockActivity : AppCompatActivity() {
 
         //mBluetoothAdapter.cancelDiscovery()
 
-        val testset = mBluetoothAdapter.bondedDevices
+        val testset = AppController.instance.mBluetoothAdapter.bondedDevices
         //val testset = AppController.instance.checkedBLE
 
+        runBlocking {
+            val jobs = List(testset.size) {
+                async(Dispatchers.Default) {
+                    delay(20)
+                    val gatt = testset.elementAt(it).connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+                    Log.d("Coroutine", "device : " + gatt.device)
+                }
+            }
+
+            jobs.forEach{ it.join() }
+        }
 
 
+        /*
         for(device in testset) {
             val job = CoroutineScope(Dispatchers.Default).launch {
 
@@ -282,27 +302,14 @@ class LockActivity : AppCompatActivity() {
 
             }
 
-
-
-
-        /*
-        for(device in testset) {
-                device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
-                Log.d("Single_connect", "device : " + device.address)
-        }
-
          */
-
-
-
-
-
 
     }
 
     private val mGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-            val intentAction: String
+
+            Log.i("LOCK_mGattCallback", "OnStatus : ${status}, NewSatus : ${newState}")
 
             if(status == BluetoothGatt.GATT_SUCCESS) {
                 if(newState == BluetoothProfile.STATE_CONNECTING) {
@@ -310,10 +317,8 @@ class LockActivity : AppCompatActivity() {
                 }
 
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    intentAction = ACTION_GATT_CONNECTED
 
                     val device = gatt.device
-
 
                     connectDeviceCount++
 
@@ -324,13 +329,14 @@ class LockActivity : AppCompatActivity() {
                     addLog("Connected Device : " + device.name)
 
                     connectedDevices.add(gatt)
-                    broadcastUpdate(intentAction)
+
+                    AppController.instance.mBluetoothGattServer?.cancelConnection(gatt.device)
                     gatt.disconnect()
-                    //gatt.close()
+
 
 
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    intentAction = ACTION_GATT_DISCONNECTED
+
                     Log.i("myTag", "---- Disconnected ----")
 
                     val device = gatt.device
@@ -341,11 +347,9 @@ class LockActivity : AppCompatActivity() {
                     gatt.close()
 
                     addLog("Disconnected Device : " + device.name)
-                    broadcastUpdate(intentAction)
 
 
-                } else {
-                    Log.i("myTestLog", "newState : $newState")
+
                 }
 
             }
@@ -355,10 +359,6 @@ class LockActivity : AppCompatActivity() {
 
         }
 
-        private fun broadcastUpdate(action: String) {
-            val intent = Intent(action)
-            sendBroadcast(intent)
-        }
     }
 
 

@@ -17,10 +17,13 @@ class AppController : Application() {
     lateinit var mDbOpenHelper: DbOpenHelper
     lateinit var checkedBLE: ArrayList<BluetoothDevice>
 
+
     lateinit var mBluetoothAdapter: BluetoothAdapter
     lateinit var mBluetoothManager: BluetoothManager
     lateinit var mBluetoothLeScanner: BluetoothLeScanner
-    lateinit var mBluetoothGattServer : BluetoothGattServer
+    var mBluetoothGattServer : BluetoothGattServer? = null
+
+
 
     lateinit var requestedDevice : BluetoothDevice
 
@@ -33,12 +36,15 @@ class AppController : Application() {
         connectInfo = getSharedPreferences("iot_info", 0)
         editor = connectInfo.edit()
 
+
         mBluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        //mBluetoothAdapter = mBluetoothManager.adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
         mBluetoothLeScanner = mBluetoothAdapter.bluetoothLeScanner
+
+
     }
+
 
     fun buildDB() {
         mDbOpenHelper = DbOpenHelper(this)

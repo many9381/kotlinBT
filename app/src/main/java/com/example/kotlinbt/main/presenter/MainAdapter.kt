@@ -108,21 +108,23 @@ class MainAdapter(var itemDatas: ArrayList<ItemData> , val context: Context, val
         Log.i("myTag", ">>> check : " + device.bondState)
 
         var index = 0
-        for (i in itemDatas!!.indices) {
-            if (itemDatas!![i].identNum.equals(device.address)) {
+
+
+        for (i in itemDatas.indices) {
+            if (itemDatas[i].identNum.equals(device.address)) {
                 index = i
             }
         }
 
         if (device.bondState == BOND_BONDED) {
-            itemDatas!![index].status = "online"
+            itemDatas[index].status = "online"
             notifyDataSetChanged()
 
         } else if (device.bondState == BOND_BONDING) {
-            itemDatas!![index].status = "online"
+            itemDatas[index].status = "online"
             notifyDataSetChanged()
         } else {
-            itemDatas!![index].status = "offline"
+            itemDatas[index].status = "offline"
             notifyDataSetChanged()
 
         }
@@ -132,22 +134,22 @@ class MainAdapter(var itemDatas: ArrayList<ItemData> , val context: Context, val
 
     fun setOnline(address: String) {
         var index = 0
-        for (i in itemDatas!!.indices) {
-            if (itemDatas!![i].identNum.equals(address)) {
+        for (i in itemDatas.indices) {
+            if (itemDatas[i].identNum.equals(address)) {
                 index = i
             }
         }
 
-        itemDatas!![index].status = "online"
+        itemDatas[index].status = "online"
         notifyDataSetChanged()
 
     }
 
     fun setOffline() {
 
-        for (i in itemDatas!!.indices) {
-            if (itemDatas!![i].status.equals("checking")) {
-                itemDatas!![i].status = "offline"
+        for (i in itemDatas.indices) {
+            if (itemDatas[i].status.equals("checking")) {
+                itemDatas[i].status = "offline"
                 notifyDataSetChanged()
             }
 

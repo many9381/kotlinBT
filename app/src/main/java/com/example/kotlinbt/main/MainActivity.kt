@@ -1,6 +1,7 @@
 package com.example.kotlinbt.main
 
 import android.Manifest
+import android.app.Activity
 import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.*
@@ -37,18 +38,17 @@ import com.example.kotlinbt.main.advertisement.AdvertiseService
 import com.example.kotlinbt.main.advertisement.TimeProfile
 import java.util.*
 import android.content.Intent
-import android.support.v4.app.SupportActivity
-import android.support.v4.app.SupportActivity.ExtraData
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-
-
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
+    /*
     private lateinit var mBluetoothAdapter: BluetoothAdapter
-    private var mBluetoothManager: BluetoothManager? = null
+    private lateinit var mBluetoothManager: BluetoothManager
     private lateinit var mBluetoothLeScanner: BluetoothLeScanner
+
+     */
 
     private val REQUEST_LOCATION_PERMISSION = 2018
     private val SCAN_PERIOD: Long = 10000
@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private var backPressedTime: Long = 0
 
 
-    private var mBluetoothGattServer : BluetoothGattServer? = null
+    //private var mBluetoothGattServer : BluetoothGattServer? = null
     private val registeredDevices = mutableSetOf<BluetoothDevice>()
 
     private val TAG = "ADVERTISING"
@@ -76,6 +76,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private var scanSettings: ScanSettings? = null
     private var mScanSettingBuilder: ScanSettings.Builder? = null
     val filters : List<ScanFilter> = ArrayList<ScanFilter>()
+
+    var flag : Boolean = true
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,7 +101,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
 
                         val address = itemDatas[position].identNum
-                        val device = mBluetoothAdapter!!.getRemoteDevice(address)
+                        val device = AppController.instance.mBluetoothAdapter.getRemoteDevice(address)
                         unpairDevice(device)
 
 
@@ -124,9 +126,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
 
-        mBluetoothManager = AppController.instance.mBluetoothManager
-        mBluetoothAdapter = AppController.instance.mBluetoothAdapter
-        mBluetoothLeScanner = AppController.instance.mBluetoothLeScanner
+
         //mBluetoothAdapter.cancelDiscovery()
 
 
@@ -185,9 +185,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
             Log.d("BTapp_MainActivity", "BT Scan Permission Request")
         }
-        mBluetoothAdapter.startDiscovery()
+        //mBluetoothAdapter.startDiscovery()
 
-        Log.d("oncreate", "${mBluetoothAdapter.scanMode}")
+
+        Log.d("oncreate", "${AppController.instance.mBluetoothAdapter.scanMode}")
 
 
         mScanSettingBuilder = ScanSettings.Builder()
@@ -197,7 +198,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         //mScanSettingBuilder.set
         scanSettings = mScanSettingBuilder!!.build()
 
-        startServer()
+
 
         //val bluetoothManager: BluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         /*
@@ -215,6 +216,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         reScanBtn.setOnClickListener {
             scanLeDevice(true)
+            flag = true
             reScanBtn.visibility = View.INVISIBLE
         }
 
@@ -223,11 +225,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun startServer() {
-        mBluetoothGattServer = mBluetoothManager?.openGattServer(this, gattServerCallback)
-        AppController.instance.mBluetoothGattServer = mBluetoothGattServer!!
-        mBluetoothGattServer?.addService(TimeProfile.createTimeService())
-        //?: Log.w(TAG, "Unable to create GATT server")
+        //mBluetoothGattServer = mBluetoothManager.openGattServer(this, gattServerCallback)
+        if(AppController.instance.mBluetoothGattServer == null) {
+            AppController.instance.mBluetoothGattServer = AppController.instance.mBluetoothManager.openGattServer(this, gattServerCallback)
+        }
 
+        if(AppController.instance.mBluetoothGattServer?.services.isNullOrEmpty()) {
+            AppController.instance.mBluetoothGattServer?.addService(TimeProfile.createTimeService())
+        }
+        //?: Log.w(TAG, "Unable to create GATT server")
         Log.d("TAG", "GATT server started")
 
         // Initialize the local UI
@@ -243,7 +249,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun stopServer() {
-        mBluetoothGattServer?.close()
+        AppController.instance.mBluetoothGattServer?.close()
+        AppController.instance.mBluetoothGattServer = null
         Log.d("TAG", "GATT server finished")
     }
 
@@ -252,7 +259,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
         filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST)
-        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
+        //filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
         registerReceiver(mPairingRequestReceiver, filter)
@@ -262,7 +269,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mAdapter.renewDatas(itemDatas)
         AppController.instance.checkedBLE = ArrayList<BluetoothDevice>()
 
-
+        AppController.instance.mBluetoothAdapter.startDiscovery()
+        startServer()
 
         //val testset = AppController.instance.checkedBLE
 
@@ -279,13 +287,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onPause() {
         super.onPause()
         scanLeDevice(false)
+
     }
 
     override fun onStop() {
         super.onStop()
         scanLeDevice(false)
-        //stopServer()
 
+
+        AppController.instance.mBluetoothAdapter.cancelDiscovery()
         val intent = Intent(this, AdvertiseService::class.java)
         stopService(intent)
 
@@ -297,8 +307,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         when(v.id) {
             R.id.deviceRegisterArea -> {
                 scanLeDevice(false)
+                stopServer()
                 val intent = Intent(this, DeviceSearchActivity::class.java)
-                unregisterReceiver(mPairingRequestReceiver)
                 startActivity(intent)
             }
             R.id.conditionRegisterArea -> {
@@ -373,7 +383,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed({
                 mScanning = false
-                mBluetoothLeScanner.stopScan(leScanCallback)
+                AppController.instance.mBluetoothLeScanner.stopScan(leScanCallback)
                 invalidateOptionsMenu()
 
                 reScanBtn.visibility = View.VISIBLE
@@ -384,10 +394,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
 
             mScanning = true
-            mBluetoothLeScanner.startScan(filters, scanSettings, leScanCallback)
+            AppController.instance.mBluetoothLeScanner.startScan(filters, scanSettings, leScanCallback)
         } else {
             mScanning = false
-            mBluetoothLeScanner.stopScan(leScanCallback)
+            AppController.instance.mBluetoothLeScanner.stopScan(leScanCallback)
         }
         invalidateOptionsMenu()
     }
@@ -510,68 +520,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private val pairedDevices= mutableListOf<BluetoothGatt>()
 
-    private val STATE_DISCONNECTED = 0
-    private val STATE_CONNECTING = 1
-    private val STATE_CONNECTED = 2
-    val ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED"
-    val ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED"
-    val ACTION_GATT_SERVICES_DISCOVERED = "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED"
-    val ACTION_DATA_AVAILABLE = "com.example.bluetooth.le.ACTION_DATA_AVAILABLE"
-    val EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA"
-    private var connectionState = STATE_DISCONNECTED
-    private val gattCallback = object : BluetoothGattCallback()  {
-        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-            val intentAction: String
-
-
-
-            when (newState) {
-                BluetoothProfile.STATE_CONNECTED -> {
-                    intentAction = ACTION_GATT_CONNECTED
-                    connectionState = STATE_CONNECTED
-
-                    //val inputData = ItemData(0, gatt.device.name, gatt.device.address, 0)
-                    //mDbOpenHelper.DbInsert(inputData)
-
-
-                    Log.i("Main_GATT", "Connected to GATT server.")
-
-                    pairedDevices.add(gatt)
-                    //gatt.requestMtu(20)
-                    //disconnectGatt()
-                    broadcastUpdate(intentAction)
-                    gatt.disconnect()
-
-                    //gatt.close()
-                }
-                BluetoothProfile.STATE_DISCONNECTED -> {
-                    intentAction = ACTION_GATT_DISCONNECTED
-                    connectionState = STATE_DISCONNECTED
-                    Log.i("Main_GATT", "Disconnected from GATT server.")
-                    //unpairDevice(gatt.device)
-                    gatt.close()
-
-                    broadcastUpdate(intentAction)
-                }
-
-
-
-            }
-
-
-        }
-
-        private fun broadcastUpdate(action: String) {
-            val intent = Intent(action)
-            sendBroadcast(intent)
-        }
-
-    }
 
     override fun onDestroy() {
         super.onDestroy()
         stopServer()
-        mBluetoothAdapter.cancelDiscovery()
+        AppController.instance.mBluetoothAdapter.cancelDiscovery()
+        unregisterReceiver(mPairingRequestReceiver)
         mDbOpenHelper.close()
 
     }
@@ -583,61 +537,124 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action
 
-            Log.i("myTag", "get Action : " + action!!)
-            Log.i("myTag", "get Action : " + action)
-            Log.i("myTag", "get Action : " + action)
+            Log.i("mPairingRequestReceiver", "OnReceive : " + action)
 
             val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
 
-            if (action == BluetoothDevice.ACTION_PAIRING_REQUEST) {
-                try {
+            when(action) {
+                BluetoothDevice.ACTION_PAIRING_REQUEST -> {
+                    try {
 
-                    //the pin in case you need to accept for an specific pin
+                        //the pin in case you need to accept for an specific pin
 
-                    val pin = intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 0)
+                        val pin =
+                            intent.getIntExtra("android.bluetooth.device.extra.PAIRING_KEY", 0)
 
-                    val pinByte: ByteArray = (""+pin).toByteArray(Charsets.UTF_8)
-                    device.setPin(pinByte)
+                        val pinByte: ByteArray = ("" + pin).toByteArray(Charsets.UTF_8)
+                        device.setPin(pinByte)
+
+                        abortBroadcast()
+
+                    } catch (e: Exception) {
+                        Log.i("myTag", "Error occurs when trying to auto pair")
+                        e.printStackTrace()
+                    }
+
+                }
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
+                    val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
+                    val prev_state = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
 
 
+                    if((state == BluetoothDevice.BOND_BONDED && prev_state == BluetoothDevice.BOND_BONDING) || state == BluetoothDevice.BOND_BONDED) {
+                        Log.d("PairingRequest", "Paired")
+                        //AppController.instance.mBluetoothGattServer?.connect(device,false)
+                        device.connectGatt(context, false,  mGattCallback, BluetoothDevice.TRANSPORT_LE)
+                        val inputData = ItemData(0, device.name, device.address, 0)
+                        mDbOpenHelper.DbInsert(inputData)
 
-                    //abortBroadcast()
+                    }
+                    else if (state == BluetoothDevice.BOND_NONE && prev_state == BluetoothDevice.BOND_BONDED){
+                        Log.d("PairingRequest", "unPaired")
+                    }
+                    else {
+                        Log.d("PairingRequest", "${state}")
+                    }
 
-                } catch (e: Exception) {
-                    Log.i("myTag", "Error occurs when trying to auto pair")
-                    e.printStackTrace()
+                }
+                BluetoothDevice.ACTION_ACL_CONNECTED -> {
+
+                    Log.i("mPairingRequestReceiver", "Connected : ${device.name}")
+
+                    val mhandler: Handler = Handler()
+                    mhandler.postDelayed({
+                        AppController.instance.mBluetoothGattServer?.cancelConnection(device)
+
+                    }, 1500)
+
+
+                }
+                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+
+                    Log.i("mPairingRequestReceiver", "DisConnected : ${device.name}")
                 }
 
             }
-            else if(action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
-                val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)
-                val prev_state = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, BluetoothDevice.ERROR)
 
-                val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                /*
-                if(device.bondState != 12) {
-                    pairDevice(device)
+
+        }
+    }
+
+    private val mGattCallback = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+
+
+            Log.i("mGattCallback", "OnStatus : ${status}, NewSatus : ${newState}")
+
+            if(status == BluetoothGatt.GATT_SUCCESS) {
+                if(newState == BluetoothProfile.STATE_CONNECTING) {
+                    Log.d("Connecting", "Device : ${gatt.device}")
+                }
+                else if (newState == BluetoothProfile.STATE_CONNECTED) {
+
+                    val device = gatt.device
+                    AppController.instance.mBluetoothGattServer?.cancelConnection(device)
+                    gatt.disconnect()
+
+
+
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                    Log.i("myTag", "---- Disconnected ----")
+
+                    val device = gatt.device
+                    Log.i("myTestLog", "disconnected Device : " + device.name)
+
+                    gatt.close()
+
+                } else {
+                    Log.i("myTestLog", "newState : $newState")
                 }
 
-                 */
-                if((state == BluetoothDevice.BOND_BONDED && prev_state == BluetoothDevice.BOND_BONDING) || state == BluetoothDevice.BOND_BONDED) {
-                    Log.d("PairingRequest", "Paired")
-
-                }
-                else if (state == BluetoothDevice.BOND_NONE && prev_state == BluetoothDevice.BOND_BONDED){
-                    Log.d("PairingRequest", "unPaired")
-                }
-                else {
-                    Log.d("PairingRequest", "${state}")
-                }
             }
-            else if(action == BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED) {
-
+            else {
+                gatt.close()
             }
+
         }
 
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(requestCode == Activity.RESULT_OK) {
+
+            AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
+        }
 
     }
+
 
     private val gattServerCallback = object : BluetoothGattServerCallback() {
 
@@ -645,19 +662,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "BluetoothDevice CONNECTED: ${device.name}")
 
-                Log.d("PairingReq", "device : ${device.name}")
-                if(true) {
+                if(device.address.equals("B8:27:EB:A6:F0:21") && flag) {
 
                     val i = Intent(this@MainActivity, LockActivity::class.java)
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
                     AppController.instance.requestedDevice = device
-                    mBluetoothGattServer!!.connect(device, false)
+                    //mBluetoothGattServer!!.connect(device, false)
+                    flag = false
+
+                    stopServer()
+                    Log.d("test", "tttttttttttttttttttttttttttttttttttttttt")
+                    AppController.instance.mBluetoothGattServer?.connect(AppController.instance.requestedDevice, false)
                     startActivity(i)
+                }
+                else {
+                    AppController.instance.mBluetoothGattServer?.cancelConnection(device)
                 }
 
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "BluetoothDevice DISCONNECTED: $device")
+
                 //Remove device from any active subscriptions
                 registeredDevices.remove(device)
 
@@ -674,16 +700,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             when {
                 TimeProfile.CURRENT_TIME == characteristic.uuid -> {
                     Log.i(TAG, "Read CurrentTime")
-                    mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, TimeProfile.getExactTime(now, TimeProfile.ADJUST_NONE))
+                    AppController.instance.mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, TimeProfile.getExactTime(now, TimeProfile.ADJUST_NONE))
                 }
                 TimeProfile.LOCAL_TIME_INFO == characteristic.uuid -> {
                     Log.i(TAG, "Read LocalTimeInfo")
-                    mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, TimeProfile.getLocalTimeInfo(now))
+                    AppController.instance.mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, TimeProfile.getLocalTimeInfo(now))
                 }
                 else -> {
                     // Invalid characteristic
                     Log.w(TAG, "Invalid Characteristic Read: " + characteristic.uuid)
-                    mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
+                    AppController.instance.mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
                 }
             }
         }
@@ -697,14 +723,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 } else {
                     BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
                 }
-                mBluetoothGattServer?.sendResponse(device,
+                AppController.instance.mBluetoothGattServer?.sendResponse(device,
                     requestId,
                     BluetoothGatt.GATT_SUCCESS,
                     0,
                     returnValue)
             } else {
                 Log.w(TAG, "Unknown descriptor read request")
-                mBluetoothGattServer?.sendResponse(device,
+                AppController.instance.mBluetoothGattServer?.sendResponse(device,
                     requestId,
                     BluetoothGatt.GATT_FAILURE,
                     0, null)
@@ -725,12 +751,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
 
                 if (responseNeeded) {
-                    mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null)
+                    AppController.instance.mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null)
                 }
             } else {
                 Log.w(TAG, "Unknown descriptor write request")
                 if (responseNeeded) {
-                    mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
+                    AppController.instance.mBluetoothGattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
                 }
             }
         }
