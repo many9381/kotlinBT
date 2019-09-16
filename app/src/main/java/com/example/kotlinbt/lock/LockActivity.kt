@@ -165,6 +165,10 @@ class LockActivity : AppCompatActivity() {
             if(isPinCheck && countCheck && targetCheck) {
                 addLog("-------- OPEN --------")
 
+                val test = mBluetoothManager?.getConnectedDevices(BluetoothProfile.GATT_SERVER)
+
+                AppController.instance.mBluetoothGattServer.cancelConnection(test!![0])
+
                 stateImg.setImageResource(R.drawable.unlock)
                 isRunning = false
             }
@@ -250,7 +254,7 @@ class LockActivity : AppCompatActivity() {
         }
 
 
-        mBluetoothAdapter.startDiscovery()
+        //mBluetoothAdapter.startDiscovery()
 
     }
 
@@ -259,7 +263,7 @@ class LockActivity : AppCompatActivity() {
         var addLogText: TextView = TextView(this@LockActivity)
         addLogText.text = ""
 
-        mBluetoothAdapter.cancelDiscovery()
+        //mBluetoothAdapter.cancelDiscovery()
 
         val testset = mBluetoothAdapter.bondedDevices
         //val testset = AppController.instance.checkedBLE

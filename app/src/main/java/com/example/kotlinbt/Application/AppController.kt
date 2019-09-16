@@ -3,6 +3,7 @@ package com.example.kotlinbt.Application
 import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.content.Context
@@ -19,7 +20,9 @@ class AppController : Application() {
     lateinit var mBluetoothAdapter: BluetoothAdapter
     lateinit var mBluetoothManager: BluetoothManager
     lateinit var mBluetoothLeScanner: BluetoothLeScanner
+    lateinit var mBluetoothGattServer : BluetoothGattServer
 
+    lateinit var requestedDevice : BluetoothDevice
 
     override fun onCreate() {
         super.onCreate()
@@ -31,7 +34,9 @@ class AppController : Application() {
         editor = connectInfo.edit()
 
         mBluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        mBluetoothAdapter = mBluetoothManager.adapter
+        //mBluetoothAdapter = mBluetoothManager.adapter
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+
         mBluetoothLeScanner = mBluetoothAdapter.bluetoothLeScanner
     }
 

@@ -73,6 +73,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private val TAG = "ADVERTISING"
 
+    private var scanSettings: ScanSettings? = null
+    private var mScanSettingBuilder: ScanSettings.Builder? = null
+    val filters : List<ScanFilter> = ArrayList<ScanFilter>()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -150,6 +155,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 != PackageManager.PERMISSION_GRANTED) {
 
                 // Should we show an explanation?
+
+                //ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 20)
+
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION) || ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
 
                     // Show an expanation to the user *asynchronously* -- don't block
@@ -162,7 +170,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                     // No explanation needed, we can request the permission.
 
-                    var manifast: Array<String> = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.BLUETOOTH_ADMIN)
+                    var manifast: Array<String> = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH)
 
                     requestPermissions(manifast, REQUEST_LOCATION_PERMISSION);
 
@@ -177,6 +185,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
             Log.d("BTapp_MainActivity", "BT Scan Permission Request")
         }
+        mBluetoothAdapter.startDiscovery()
+
+        Log.d("oncreate", "${mBluetoothAdapter.scanMode}")
+
+
+        mScanSettingBuilder = ScanSettings.Builder()
+        //val scanSettings = mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(10).setLegacy(false).setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED).build()
+        mScanSettingBuilder!!.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+        mScanSettingBuilder!!.setReportDelay(0)
+        //mScanSettingBuilder.set
+        scanSettings = mScanSettingBuilder!!.build()
 
         startServer()
 
@@ -205,6 +224,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun startServer() {
         mBluetoothGattServer = mBluetoothManager?.openGattServer(this, gattServerCallback)
+        AppController.instance.mBluetoothGattServer = mBluetoothGattServer!!
         mBluetoothGattServer?.addService(TimeProfile.createTimeService())
         //?: Log.w(TAG, "Unable to create GATT server")
 
@@ -232,6 +252,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
         filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST)
+        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
         registerReceiver(mPairingRequestReceiver, filter)
 
         //recyclerview add item
@@ -261,7 +284,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onStop() {
         super.onStop()
         scanLeDevice(false)
-        stopServer()
+        //stopServer()
 
         val intent = Intent(this, AdvertiseService::class.java)
         stopService(intent)
@@ -356,10 +379,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 reScanBtn.visibility = View.VISIBLE
             }, SCAN_PERIOD)
 
-            val mScanSettingBuilder = ScanSettings.Builder()
-            val filters : List<ScanFilter> = ArrayList<ScanFilter>()
-            //val scanSettings = mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(10).setLegacy(false).setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED).build()
-            val scanSettings = mScanSettingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(0).build()
+
 
 
 
@@ -550,6 +570,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        stopServer()
+        mBluetoothAdapter.cancelDiscovery()
         mDbOpenHelper.close()
 
     }
@@ -565,9 +587,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             Log.i("myTag", "get Action : " + action)
             Log.i("myTag", "get Action : " + action)
 
+            val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+
             if (action == BluetoothDevice.ACTION_PAIRING_REQUEST) {
                 try {
-                    val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
 
                     //the pin in case you need to accept for an specific pin
 
@@ -576,16 +599,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     val pinByte: ByteArray = (""+pin).toByteArray(Charsets.UTF_8)
                     device.setPin(pinByte)
 
-                    Log.d("PairingReq", "device : ${device.name}")
 
-                    if(device.address.equals("53:F1:59:2C:DC:CA") ) {
 
-                        val i = Intent(context, LockActivity::class.java)
-                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        startActivity(i)
-                    }
-
-                    abortBroadcast()
+                    //abortBroadcast()
 
                 } catch (e: Exception) {
                     Log.i("myTag", "Error occurs when trying to auto pair")
@@ -615,9 +631,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     Log.d("PairingRequest", "${state}")
                 }
             }
+            else if(action == BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED) {
 
-
+            }
         }
+
+
     }
 
     private val gattServerCallback = object : BluetoothGattServerCallback() {
@@ -625,6 +644,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "BluetoothDevice CONNECTED: ${device.name}")
+
+                Log.d("PairingReq", "device : ${device.name}")
+                if(true) {
+
+                    val i = Intent(this@MainActivity, LockActivity::class.java)
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    AppController.instance.requestedDevice = device
+                    mBluetoothGattServer!!.connect(device, false)
+                    startActivity(i)
+                }
 
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {

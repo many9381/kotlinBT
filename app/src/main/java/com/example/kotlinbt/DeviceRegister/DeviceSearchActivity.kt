@@ -308,7 +308,7 @@ class DeviceSearchActivity : AppCompatActivity() {
                  * 연결 시도
                  */
 
-                mBluetoothAdapter.cancelDiscovery()
+                //mBluetoothAdapter.cancelDiscovery()
                 scanLeDevice(false)
 
                 val address = inputData.identNum
@@ -328,7 +328,7 @@ class DeviceSearchActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext, "페어링 실패 다시시도하세요", Toast.LENGTH_SHORT).show()
                 }
                 //bluetoothGatt = device.connectGatt(this, false, gattCallback)
-                mBluetoothAdapter.startDiscovery()
+                //mBluetoothAdapter.startDiscovery()
 
 
             }
