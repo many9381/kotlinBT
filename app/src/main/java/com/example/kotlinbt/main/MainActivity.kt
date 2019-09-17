@@ -29,15 +29,13 @@ import com.example.kotlinbt.database.DbOpenHelper
 import com.example.kotlinbt.database.ItemData
 import com.example.kotlinbt.lock.LockActivity
 import com.example.kotlinbt.main.presenter.MainAdapter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 import com.example.kotlinbt.main.advertisement.AdvertiseService
 import com.example.kotlinbt.main.advertisement.TimeProfile
 import java.util.*
 import android.content.Intent
+import kotlinx.android.synthetic.main.main_list_item.*
+import kotlinx.coroutines.*
 import kotlin.collections.ArrayList
 
 
@@ -274,6 +272,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         //val testset = AppController.instance.checkedBLE
 
+        Log.d("Main_OnResume" , "APPCONTROLLER : ${AppController.instance.requestedDevice}")
+        //checkAuth()
+
 
         scanLeDevice(true)
 
@@ -281,6 +282,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         //startService(intent)
         startForegroundService(intent)
 
+
+    }
+
+    fun checkAuth() {
+
+        if(AppController.instance.requestedDevice != null) {
+            runBlocking {
+                AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
+                delay(100)
+            }
+
+            while (true) {
+                if(AppController.instance.mBluetoothManager.getConnectionState(AppController.instance.requestedDevice, BluetoothProfile.GATT_SERVER) == BluetoothProfile.STATE_CONNECTED) {
+
+                    val ret = AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
+                }
+                else {
+                    break
+                }
+            }
+
+        }
 
     }
 
@@ -398,6 +421,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         } else {
             mScanning = false
             AppController.instance.mBluetoothLeScanner.stopScan(leScanCallback)
+            runBlocking {
+                delay(360)
+            }
         }
         invalidateOptionsMenu()
     }
@@ -644,14 +670,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode == Activity.RESULT_OK) {
+        if(requestCode == 11) {
+            if(resultCode ==  Activity.RESULT_OK) {
 
-            AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
+                Log.d("onActivityResult", "RESULT_OK")
+
+            }
         }
+
 
     }
 
@@ -664,17 +693,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                 if(device.address.equals("B8:27:EB:A6:F0:21") && flag) {
 
-                    val i = Intent(this@MainActivity, LockActivity::class.java)
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    val i = Intent(applicationContext, LockActivity::class.java)
+                    //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
                     AppController.instance.requestedDevice = device
                     //mBluetoothGattServer!!.connect(device, false)
                     flag = false
 
-                    stopServer()
+
                     Log.d("test", "tttttttttttttttttttttttttttttttttttttttt")
                     AppController.instance.mBluetoothGattServer?.connect(AppController.instance.requestedDevice, false)
-                    startActivity(i)
+                    stopServer()
+
+
+
+                    startActivityForResult(i, 11)
                 }
                 else {
                     AppController.instance.mBluetoothGattServer?.cancelConnection(device)

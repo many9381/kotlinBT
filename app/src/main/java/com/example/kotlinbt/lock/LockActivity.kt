@@ -4,6 +4,7 @@ import android.app.Activity
 import android.bluetooth.*
 import android.bluetooth.le.*
 import android.content.*
+import android.content.res.Configuration
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -19,11 +20,17 @@ import com.example.kotlinbt.database.DbOpenHelper
 import com.example.kotlinbt.database.ItemData
 import kotlinx.android.synthetic.main.activity_lock.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import java.lang.Runnable
 import kotlin.concurrent.thread
 import kotlin.coroutines.*
 
-class LockActivity : AppCompatActivity() {
+class LockActivity : AppCompatActivity(), CoroutineScope{
+
+    private lateinit var job: Job
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
 
     var countUp = 0
 
@@ -43,35 +50,18 @@ class LockActivity : AppCompatActivity() {
 
     lateinit var mDbOpenHelper: DbOpenHelper
 
-
-    /*
-    private lateinit var mBluetoothAdapter: BluetoothAdapter
-    private lateinit var mBluetoothManager: BluetoothManager
-    private lateinit var mBluetoothLeScanner: BluetoothLeScanner
-     */
     lateinit var moduleList: ArrayList<ItemData>
-
-
     private val connectedDevices= mutableListOf<BluetoothGatt>()
+    lateinit var  testset : MutableSet<BluetoothDevice>
+    val checkSet : MutableMap<String, Boolean> = mutableMapOf()
 
-
-
-
-    val ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED"
-    val ACTION_GATT_CONNECTING = "com.example.bluetooth.le.ACTION_GATT_CONNECTING"
-    val ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lock)
 
-
-        /*
-        mBluetoothManager = AppController.instance.mBluetoothManager
-        mBluetoothAdapter = AppController.instance.mBluetoothAdapter
-        */
-
+        job = Job()
 
         mDbOpenHelper = AppController.instance.mDbOpenHelper
         moduleList = mDbOpenHelper.DbMainSelect()
@@ -106,6 +96,10 @@ class LockActivity : AppCompatActivity() {
         }
 
         targetDeviceMax = mDbOpenHelper.DbTarget().size
+
+        checkSet.clear()
+
+
 
 
         // target Device Check
@@ -165,21 +159,7 @@ class LockActivity : AppCompatActivity() {
             countupText.text = temp
             //Log.d("timer", "working")
 
-            if(isPinCheck && countCheck && targetCheck) {
-                addLog("-------- OPEN --------")
 
-                val test = AppController.instance.mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER)
-
-
-                //@TODO 실제 구현시에는 connection 유지, 인증 실패할 때 connection 종료로 구현해야함.
-
-
-                setResult(Activity.RESULT_OK)
-                stateImg.setImageResource(R.drawable.unlock)
-                isRunning = false
-                AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
-                finish()
-            }
 
             if (connectDeviceCount >= connectDeviceMax) {
 
@@ -224,6 +204,31 @@ class LockActivity : AppCompatActivity() {
             }
 
 
+            if(isPinCheck && countCheck && targetCheck) {
+                addLog("-------- OPEN --------")
+
+                val test = AppController.instance.mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER)
+
+
+                //@TODO 실제 구현시에는 connection 유지, 인증 실패할 때 connection 종료로 구현해야함
+
+                val inten = Intent()
+                inten.putExtra("result2", "12")
+                if(parent == null) {
+                    setResult(Activity.RESULT_OK, inten)
+                }
+                else {
+                    parent.setResult(Activity.RESULT_OK, inten)
+                }
+                stateImg.setImageResource(R.drawable.unlock)
+                isRunning = false
+                if(AppController.instance.requestedDevice != null) {
+                    AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
+                }
+                finish()
+            }
+
+
         }
     }
 
@@ -241,13 +246,17 @@ class LockActivity : AppCompatActivity() {
         super.onDestroy()
         isRunning = false
 
+        job.cancel()
+
 
         Log.d("lock_destroy", "connected device : " + connectedDevices.size )
 
 
+
+
         for(device in connectedDevices) {
             //device.disconnect()
-            val job = CoroutineScope(Dispatchers.Default).launch {
+            val jobs = CoroutineScope(Dispatchers.Default).launch {
 
                 //device.disconnect()
                 //device.close()
@@ -262,6 +271,7 @@ class LockActivity : AppCompatActivity() {
         }
 
 
+
         //mBluetoothAdapter.startDiscovery()
 
     }
@@ -273,38 +283,87 @@ class LockActivity : AppCompatActivity() {
 
         //mBluetoothAdapter.cancelDiscovery()
 
-        val testset = AppController.instance.mBluetoothAdapter.bondedDevices
-        //val testset = AppController.instance.checkedBLE
+        testset = AppController.instance.mBluetoothAdapter.bondedDevices
 
-        runBlocking {
-            val jobs = List(testset.size) {
-                async(Dispatchers.Default) {
-                    delay(20)
-                    val gatt = testset.elementAt(it).connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
-                    Log.d("Coroutine", "device : " + gatt.device)
-                }
-            }
-
-            jobs.forEach{ it.join() }
+        testset.forEach {
+            checkSet[it.address] = false
         }
 
 
-        /*
-        for(device in testset) {
-            val job = CoroutineScope(Dispatchers.Default).launch {
 
-                //delay(50)
-                val gatt = device.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+        launch {
 
-                Log.d("Coroutine", "device : " + device.address)
+            val jobs: ArrayList<Job> = ArrayList<Job>()
 
+
+            launch {
+
+                var nu : Int = 1
+                while(true) {
+
+                    jobs.clear()
+
+                    testset.forEachIndexed { index, bluetoothDevice ->
+                        if(checkSet[bluetoothDevice.address] == false) {
+                            jobs.add(launch {
+
+                                val gatt = bluetoothDevice.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+                                delay(300)
+                                Log.e("Coroutine", "device ADDR : " + gatt.device.address)
+                                Log.e("Coroutine", "device NAME : " + gatt.device.name)
+
+                            })
+                        }
+
+
+                    }
+
+
+                    jobs.forEach{
+                        it.join()
+                        delay(180)
+                        Log.d("Coroutine", "Cycle : ${nu}" )
+                    }
+
+                    if(checkSet.all { it.value == true }) {
+                        break
+                    }
+                    else {
+                        Log.d("Coroutine", "delayed .... ")
+                        delay(1000)
+                        nu = nu + 1
+                    }
+
+                    if(nu == 10) {
+                        break
+                    }
                 }
-
             }
 
-         */
+        }
+
 
     }
+
+    fun searchFun()  {
+
+
+
+    }
+
+
+/*
+    suspend fun searchFun(it: Int) {
+        if(checkSet[testset.elementAt(it).address] == false) {
+            delay(20)
+            val gatt = testset.elementAt(it).connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+            Log.d("Coroutine", "device : " + gatt.device)
+        }
+
+
+    }
+
+ */
 
     private val mGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
@@ -326,7 +385,9 @@ class LockActivity : AppCompatActivity() {
                         targetDeviceCount++
                     }
 
+                    checkSet[gatt.device.address] = true
                     addLog("Connected Device : " + device.name)
+
 
                     connectedDevices.add(gatt)
 

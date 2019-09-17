@@ -25,7 +25,7 @@ class AppController : Application() {
 
 
 
-    lateinit var requestedDevice : BluetoothDevice
+    var requestedDevice : BluetoothDevice? = null
 
     override fun onCreate() {
         super.onCreate()

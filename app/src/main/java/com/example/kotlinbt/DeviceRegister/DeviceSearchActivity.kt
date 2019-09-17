@@ -88,27 +88,8 @@ class DeviceSearchActivity : AppCompatActivity() {
             finish()
         }
 
-        // Initializes a Bluetooth adapter.  For API level 18 and above, get a reference to
-        // BluetoothAdapter through BluetoothManager.
-
-        //mBluetoothManager = AppController.instance.mBluetoothManager
-        //mBluetoothAdapter = AppController.instance.mBluetoothAdapter
-
-
-
         //get DBinstance from AppController
         mDbOpenHelper = AppController.instance.mDbOpenHelper
-
-
-
-        /*
-        val filter = IntentFilter(BluetoothDevice.ACTION_PAIRING_REQUEST)
-        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED)
-        filter.priority = IntentFilter.SYSTEM_HIGH_PRIORITY
-        registerReceiver(mPairingRequestReceiver, filter)
-
-         */
 
     }
 
@@ -199,27 +180,20 @@ class DeviceSearchActivity : AppCompatActivity() {
                  * 연결 시도
                  */
 
-                //mBluetoothAdapter.cancelDiscovery()
                 scanLeDevice(false)
 
                 val address = inputData.identNum
                 val device = AppController.instance.mBluetoothAdapter.getRemoteDevice(address)
 
-                //unpairDevice(device)
 
                 if(pairDevice(device)) {
 
-                    //Log.i("registerDevice", "disconnect")
-
-                    //disconnectGatt()
                     Toast.makeText(applicationContext, "등록 완료", Toast.LENGTH_SHORT).show()
 
                 }
                 else {
                     Toast.makeText(applicationContext, "페어링 실패 다시시도하세요", Toast.LENGTH_SHORT).show()
                 }
-                //bluetoothGatt = device.connectGatt(this, false, gattCallback)
-                //mBluetoothAdapter.startDiscovery()
 
 
             }
@@ -257,33 +231,23 @@ class DeviceSearchActivity : AppCompatActivity() {
                     val inputData = ItemData(0, gatt.device.name, gatt.device.address, 0)
                     mDbOpenHelper.DbInsert(inputData)
 
-
-
-
                     Log.i("GATT", "Connected to GATT server.")
 
                     pairedDevices.add(gatt)
-                    //gatt.requestMtu(20)
-                    //disconnectGatt()
+
                     broadcastUpdate(intentAction)
                     gatt.disconnect()
-
-                    //gatt.close()
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     intentAction = ACTION_GATT_DISCONNECTED
                     connectionState = STATE_DISCONNECTED
                     Log.i("GATT", "Disconnected from GATT server.")
-                    //unpairDevice(gatt.device)
                     gatt.close()
 
                     broadcastUpdate(intentAction)
                 }
 
-
-
             }
-
 
         }
 
@@ -332,18 +296,6 @@ class DeviceSearchActivity : AppCompatActivity() {
             val device = result.device
             val record = result.scanRecord
 
-
-            /*
-            if (true){//device.name != null) {
-                Log.d("Hex", "UUID : " + device.name)
-                Log.d("Address", "ADDRESS " + device.address)
-               // Log.d("Hex", "PREPIX : " + prepixHexString)
-               // Log.d("Hex", "HEXID : " + hexString)
-
-            }
-
-             */
-
             if (mDbOpenHelper.DbFind(device.address) == null && device.name != null) {
                 //if (mDbOpenHelper.DbFind(device.address) == null) {
                 Log.d("Hex", "UUID : " + device.name)
@@ -377,12 +329,8 @@ class DeviceSearchActivity : AppCompatActivity() {
         Log.i("SearchActivity-Pairing", "name : " + device.getName().toString())
         Log.i("SearchActivity-Pairing", "address : " + device.getAddress().toString())
 
-        //val mGatt = device.connectGatt(this, false, gattCallback, TRANSPORT_LE)
-        //mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+
         val bondresult = device.createBond()
-
-
-
 
 
         Log.i("SearchActivity-Pairing", "Bondresult : " + bondresult)
