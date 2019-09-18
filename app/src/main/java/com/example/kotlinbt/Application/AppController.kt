@@ -1,10 +1,7 @@
 package com.example.kotlinbt.Application
 
 import android.app.Application
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGattServer
-import android.bluetooth.BluetoothManager
+import android.bluetooth.*
 import android.bluetooth.le.BluetoothLeScanner
 import android.content.Context
 import android.content.SharedPreferences
@@ -21,6 +18,7 @@ class AppController : Application() {
     lateinit var mBluetoothAdapter: BluetoothAdapter
     lateinit var mBluetoothManager: BluetoothManager
     lateinit var mBluetoothLeScanner: BluetoothLeScanner
+    lateinit var requestedGATT: BluetoothGatt
     var mBluetoothGattServer : BluetoothGattServer? = null
 
 

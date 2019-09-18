@@ -224,6 +224,12 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
                 isRunning = false
                 if(AppController.instance.requestedDevice != null) {
                     AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
+
+
+                    AppController.instance.requestedGATT.discoverServices()
+
+
+
                 }
                 finish()
             }
@@ -391,8 +397,11 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
 
                     connectedDevices.add(gatt)
 
-                    AppController.instance.mBluetoothGattServer?.cancelConnection(gatt.device)
-                    gatt.disconnect()
+                    if(gatt.device.address != "B8:27:EB:A6:F0:21") {
+                        AppController.instance.mBluetoothGattServer?.cancelConnection(gatt.device)
+                        gatt.disconnect()
+                    }
+
 
 
 
