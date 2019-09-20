@@ -286,28 +286,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
-    fun checkAuth() {
-
-        if(AppController.instance.requestedDevice != null) {
-            runBlocking {
-                AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
-                delay(100)
-            }
-
-            while (true) {
-                if(AppController.instance.mBluetoothManager.getConnectionState(AppController.instance.requestedDevice, BluetoothProfile.GATT_SERVER) == BluetoothProfile.STATE_CONNECTED) {
-
-                    val ret = AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
-                }
-                else {
-                    break
-                }
-            }
-
-        }
-
-    }
-
     override fun onPause() {
         super.onPause()
         scanLeDevice(false)
@@ -331,7 +309,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         when(v.id) {
             R.id.deviceRegisterArea -> {
                 scanLeDevice(false)
-                stopServer()
+                //stopServer()
                 val intent = Intent(this, DeviceSearchActivity::class.java)
                 startActivity(intent)
             }
@@ -620,12 +598,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         mhandler.postDelayed({
                             AppController.instance.mBluetoothGattServer?.cancelConnection(device)
 
-                        }, 1500)
+                        }, 500)
                     }
                 }
                 BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
 
                     Log.i("mPairingRequestReceiver", "DisConnected : ${device.name}")
+
                 }
 
             }
@@ -682,6 +661,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             super.onServicesDiscovered(gatt, status)
 
             Log.i("GattServiceCallback", "device : ${gatt!!.device.name}")
+            Log.i("GattServiceCallback", "address : ${gatt!!.device.address}")
 
             val ttt = gatt.services
 
@@ -694,10 +674,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     for(character in  deviceGattService.characteristics) {
                         Log.i("GattServiceCallback", "cccccccccc : ${character.uuid}")
 
-                        gatt.readCharacteristic(character)
+
 
                         if(character.uuid.toString() == "0000cccc-0000-1000-8000-00805f9b34fb") {
 
+                            gatt.readCharacteristic(character)
                             gatt.setCharacteristicNotification(character, true)
                             gatt.writeCharacteristic(character)
 
@@ -716,13 +697,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
             Log.i("CharacteristicRead", "device : ${gatt!!.device.name}")
 
-            Log.i("GattServiceCallback", "dddddddddd : ${characteristic?.value}")
+            //Log.i("GattServiceCallback", "dddddddddd : ${characteristic?.getIntValue(1, 1)}")
 
             val vals = characteristic?.value
             Log.i("GattServiceCallback", "dddddddddd : ${vals?.size}")
 
             //AppController.instance.requestedGATT.disconnect()
+
             gatt.disconnect()
+
             
         }
 
@@ -773,11 +756,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     val i = Intent(applicationContext, LockActivity::class.java)
                     //i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-                    AppController.instance.requestedDevice = device
+                    //AppController.instance.requestedDevice = device
                     //mBluetoothGattServer!!.connect(device, false)
                     flag = false
 
                     AppController.instance.requestedGATT = device.connectGatt(applicationContext,false, mGattCallback)
+                    AppController.instance.requestedDevice = AppController.instance.requestedGATT.device
                     Log.d("test", "tttttttttttttttttttttttttttttttttttttttt")
                     //AppController.instance.mBluetoothGattServer?.connect(AppController.instance.requestedDevice, false)
 

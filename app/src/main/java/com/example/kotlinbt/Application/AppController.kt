@@ -38,6 +38,7 @@ class AppController : Application() {
         mBluetoothManager = applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
+
         mBluetoothLeScanner = mBluetoothAdapter.bluetoothLeScanner
 
 

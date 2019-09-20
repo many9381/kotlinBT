@@ -1,4 +1,4 @@
-#Wed Sep 18 15:22:45 KST 2019
+#Fri Sep 20 12:53:49 KST 2019
 base.0=/Users/many/Desktop/lab/ble_android/KotlinBT/app/build/intermediates/dex/debug/mergeExtDexDebug/out/classes.dex
 path.1=classes.dex
 renamed.1=classes2.dex

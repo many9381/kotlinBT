@@ -98,6 +98,7 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
         targetDeviceMax = mDbOpenHelper.DbTarget().size
 
         checkSet.clear()
+        connectedDevices.clear()
 
 
 
@@ -204,35 +205,7 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
             }
 
 
-            if(isPinCheck && countCheck && targetCheck) {
-                addLog("-------- OPEN --------")
 
-                val test = AppController.instance.mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER)
-
-
-                //@TODO 실제 구현시에는 connection 유지, 인증 실패할 때 connection 종료로 구현해야함
-
-                val inten = Intent()
-                inten.putExtra("result2", "12")
-                if(parent == null) {
-                    setResult(Activity.RESULT_OK, inten)
-                }
-                else {
-                    parent.setResult(Activity.RESULT_OK, inten)
-                }
-                stateImg.setImageResource(R.drawable.unlock)
-                isRunning = false
-                if(AppController.instance.requestedDevice != null) {
-                    AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
-
-
-                    AppController.instance.requestedGATT.discoverServices()
-
-
-
-                }
-                finish()
-            }
 
 
         }
@@ -260,23 +233,25 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
 
 
 
-        for(device in connectedDevices) {
-            //device.disconnect()
-            val jobs = CoroutineScope(Dispatchers.Default).launch {
-
+        if(connectedDevices.isNotEmpty()) {
+            for(device in connectedDevices) {
                 //device.disconnect()
-                //device.close()
-                device.disconnect()
+                val jobs = CoroutineScope(Dispatchers.Default).launch {
 
-                Log.d("Lock_Destroy", "disconnect !! : ${device.device.name} ")
-                delay(2000)
-                Log.d("Lock_Destroy", "closed !! : ${device.device.name}")
-                device.close()
+                    //device.disconnect()
+                    //device.close()
+                    device.disconnect()
 
+                    Log.d("Lock_Destroy", "disconnect !! : ${device.device.name} ")
+                    delay(300)
+                    Log.d("Lock_Destroy", "closed !! : ${device.device.name}")
+                    device.close()
+
+                }
             }
         }
 
-
+        AppController.instance.requestedGATT.disconnect()
 
         //mBluetoothAdapter.startDiscovery()
 
@@ -307,18 +282,41 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
                 var nu : Int = 1
                 while(true) {
 
+
                     jobs.clear()
 
-                    testset.forEachIndexed { index, bluetoothDevice ->
+
+                    testset.forEach { bluetoothDevice ->
                         if(checkSet[bluetoothDevice.address] == false) {
-                            jobs.add(launch {
+                            if(connectedDevices.isEmpty() || connectedDevices.none { it.device.address == bluetoothDevice.address }) {
+                                jobs.add(launch {
+                                    val gatt = bluetoothDevice.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+                                    connectedDevices.add(gatt)
+                                    Log.e("Coroutine", "device ADDR : " + gatt.device.address)
+                                    Log.e("Coroutine", "device NAME : " + gatt.device.name)
+                                    //delay(150)
+                                })
+                            }
+                            else {
 
-                                val gatt = bluetoothDevice.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
-                                delay(300)
-                                Log.e("Coroutine", "device ADDR : " + gatt.device.address)
-                                Log.e("Coroutine", "device NAME : " + gatt.device.name)
+                                if(connectedDevices.isNotEmpty()) {
+                                    for (dev in connectedDevices) {
+                                        if(dev.device.address == bluetoothDevice.address) {
+                                            connectedDevices.removeAt(connectedDevices.indexOf(dev))
+                                            break
+                                        }
+                                    }
+                                }
 
-                            })
+                                jobs.add(launch {
+                                    val gatt = bluetoothDevice.connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
+                                    connectedDevices.add(gatt)
+                                    Log.e("Coroutine", "device ADDR : " + gatt.device.address)
+                                    Log.e("Coroutine", "device NAME : " + gatt.device.name)
+                                })
+
+                            }
+
                         }
 
 
@@ -327,8 +325,12 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
 
                     jobs.forEach{
                         it.join()
-                        delay(180)
+                        //delay(100)
                         Log.d("Coroutine", "Cycle : ${nu}" )
+                    }
+
+                    if(nu == 3) {
+                        val test: String = "t"
                     }
 
                     if(checkSet.all { it.value == true }) {
@@ -336,11 +338,11 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
                     }
                     else {
                         Log.d("Coroutine", "delayed .... ")
-                        delay(1000)
+                        delay(350)
                         nu = nu + 1
                     }
 
-                    if(nu == 10) {
+                    if(nu >= 100) {
                         break
                     }
                 }
@@ -351,25 +353,8 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
 
     }
 
-    fun searchFun()  {
 
-
-
-    }
-
-
-/*
-    suspend fun searchFun(it: Int) {
-        if(checkSet[testset.elementAt(it).address] == false) {
-            delay(20)
-            val gatt = testset.elementAt(it).connectGatt(this@LockActivity, false, mGattCallback, BluetoothDevice.TRANSPORT_LE)
-            Log.d("Coroutine", "device : " + gatt.device)
-        }
-
-
-    }
-
- */
+    var ones = true
 
     private val mGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
@@ -385,21 +370,56 @@ class LockActivity : AppCompatActivity(), CoroutineScope{
 
                     val device = gatt.device
 
-                    connectDeviceCount++
+                    if(checkSet[gatt.device.address] == false) {
+                        checkSet[gatt.device.address] = true
+                        connectDeviceCount++
+                        Log.i("LOCK_mGattCallback", "hhhhhhhhhhhhhhhhhhhhhhhhh : ${gatt.device.address}")
+                        addLog("Connected Device : " + device.name)
+                    }
+
 
                     if (mDbOpenHelper.DbTargetFind(device.address) != null) {
                         targetDeviceCount++
                     }
 
-                    checkSet[gatt.device.address] = true
-                    addLog("Connected Device : " + device.name)
 
-
-                    connectedDevices.add(gatt)
+                    //connectedDevices.add(gatt)
 
                     if(gatt.device.address != "B8:27:EB:A6:F0:21") {
                         AppController.instance.mBluetoothGattServer?.cancelConnection(gatt.device)
                         gatt.disconnect()
+                    }
+
+                    if(isPinCheck && countCheck && targetCheck && ones) {
+                        addLog("-------- OPEN --------")
+                        ones = false
+
+                        val test = AppController.instance.mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER)
+
+
+                        //@TODO 실제 구현시에는 connection 유지, 인증 실패할 때 connection 종료로 구현해야함
+
+                        val inten = Intent()
+                        inten.putExtra("result2", "12")
+                        if(parent == null) {
+                            setResult(Activity.RESULT_OK, inten)
+                        }
+                        else {
+                            parent.setResult(Activity.RESULT_OK, inten)
+                        }
+                        stateImg.setImageResource(R.drawable.unlock)
+                        isRunning = false
+
+                        if(AppController.instance.requestedDevice != null) {
+                            Log.i("LOCK_mGattCallback", "rrrrrrrrrr : ${AppController.instance.requestedDevice}")
+
+                            AppController.instance.requestedGATT.discoverServices()
+                            AppController.instance.requestedGATT.disconnect()
+
+                            AppController.instance.mBluetoothGattServer?.cancelConnection(AppController.instance.requestedDevice)
+
+                        }
+                        finish()
                     }
 
 
